@@ -1,4 +1,4 @@
-# OpenLoco
+<img src="https://raw.githubusercontent.com/federico1564S/openloco/master/logo/logo.png" alt="logo" width="300px">
 
 > An open source and open hardware DCC decoder for locomotives.
 
