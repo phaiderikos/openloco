@@ -20,6 +20,9 @@
 #include "tim.h"
 #include "gpio.h"
 
+#include "decoder.h"
+
+extern struct decoder dec1;
 
 void SystemClock_Config(void);
 
@@ -40,7 +43,13 @@ int main(void)
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
+
+	MX_TIM2_Init();
 	MX_TIM22_Init();
+
+	decoder_reset(&dec1);
+
+	HAL_TIM_Base_Start_IT(&htim2);
 
 	while (1) {
 

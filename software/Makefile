@@ -59,7 +59,10 @@ $(REPO_DIR)/STM32Cube_FW_L0_V1.12.1/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_h
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.1/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_pwr_ex.c \
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.1/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_cortex.c \
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.1/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_exti.c \
-core/src/system_stm32l0xx.c  
+core/src/system_stm32l0xx.c \
+core/src/dcc/cv.c \
+core/src/dcc/dcc_funct.c \
+core/src/dcc/decoder.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -117,6 +120,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -Icore/inc \
+-Icore/inc/dcc \
 -I$(REPO_DIR)/STM32Cube_FW_L0_V1.12.1/Drivers/STM32L0xx_HAL_Driver/Inc \
 -I$(REPO_DIR)/STM32Cube_FW_L0_V1.12.1/Drivers/STM32L0xx_HAL_Driver/Inc/Legacy \
 -I$(REPO_DIR)/STM32Cube_FW_L0_V1.12.1/Drivers/CMSIS/Device/ST/STM32L0xx/Include \

@@ -22,7 +22,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+extern TIM_HandleTypeDef htim2;
+
 extern TIM_HandleTypeDef htim22;
+
+void MX_TIM2_Init(void);
 
 void MX_TIM22_Init(void);
 
