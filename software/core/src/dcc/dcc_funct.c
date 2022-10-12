@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file    :   dcc_funct.c
- * @brief   :   
+ * @brief   :
  * @author  :   Davide Campagna
  * @date    :   Sep 09, 2022
  * @version :   V1.0
@@ -9,6 +9,7 @@
 #include "dcc_funct.h"
 #include "cv.h"
 #include "config.h"
+#include "main.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -23,54 +24,52 @@ uint8_t dcc_dec_ctrl(uint8_t instr, uint8_t data, uint8_t data_c)
 
 	sub_i = instr & 0x0fu;
 	switch (sub_i) {
-		case DCC_DC_RST:
-			if (data_c < 2) {
-				return DCC_ERROR;
-			}
+	case DCC_DC_RST:
+		if (data_c < 2) {
+			return DCC_ERROR;
+		}
 
-			if (data == 1) {
-				/* Hard Reset */
-				write_cv(19, 0x00);
-				write_cv(29, CV29);
-				write_cv(31, CV31);
-				write_cv(32, CV32);
-				/* than call Digital Decoder Reset */
-			} else if (data == 0) {
-				/* Digital Decoder Reset */
-				// TODO: implement
-			}
-			break;
-		case DCC_DC_FTI:
-			/* Factory Test */
-			// TODO: implement
-			break;
-		case DCC_DC_RES1:
-		case DCC_DC_RES2:
-		case DCC_DC_RES3:
-			/* Reserved for future use */
-			break;
-		case DCC_DC_SDF:
-			/* Set Decoder Flag */
-			// TODO: implement
-			break;
-		case DCC_DC_SAA:
-			/* Decoder Acknowledgment Request */
-			tmp = read_cv(29);
-			write_cv(29, tmp | 0x20);
-			// TODO: implement
-			break;
-		case DCC_DC_DAR:
-			/* Decoder Acknowledgment Request */
-			// TODO: implement
-			break;
-		default:
-			break;
+		if (data == 1) {
+			/* Hard Reset */
+			write_cv(19, 0x00);
+			write_cv(29, CV29);
+			/* than call Digital Decoder Reset */
+		} else if (data == 0) {
+			/* Digital Decoder Reset */
+			/* TODO: implement */
+		}
+		break;
+	case DCC_DC_FTI:
+		/* Factory Test */
+		/* TODO: implement */
+		break;
+	case DCC_DC_RES1:
+	case DCC_DC_RES2:
+	case DCC_DC_RES3:
+		/* Reserved for future use */
+		break;
+	case DCC_DC_SDF:
+		/* Set Decoder Flag */
+		/* TODO: implement */
+		break;
+	case DCC_DC_SAA:
+		/* Decoder Acknowledgment Request */
+		tmp = read_cv(29);
+		write_cv(29, tmp | 0x20);
+		/* TODO: implement */
+		break;
+	case DCC_DC_DAR:
+		/* Decoder Acknowledgment Request */
+		/* TODO: implement */
+		break;
+	default:
+		break;
 	}
 
 	return DCC_OK;
 }
 
-// TODO: implement
+/* TODO: implement */
 uint8_t dcc_cons_ctrl(uint8_t instr, uint8_t data, uint8_t data_c)
 {
 	uint8_t sub_i;
@@ -82,28 +81,27 @@ uint8_t dcc_cons_ctrl(uint8_t instr, uint8_t data, uint8_t data_c)
 	sub_i = instr & 0x0fu;
 
 	switch (sub_i) {
-		case DCC_CC_FWD:
-			/* Consist direction: Normal */
-			break;
-		case DCC_CC_BWD:
-			/* Consist direction: Opposite */
-			break;
-		default:
-			return DCC_ERROR;
+	case DCC_CC_FWD:
+		/* Consist direction: Normal */
+		break;
+	case DCC_CC_BWD:
+		/* Consist direction: Opposite */
+		break;
+	default:
+		return DCC_ERROR;
 	}
 
-	if (data == 0)
-		;
+	if (data == 0) {
 		/* Consist deactivated */
-	else
+	} else {
 		/* Consist activated with address */
-		;
+	}
 
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_cv_acc_s(uint8_t instr, const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_cv_acc_s(uint8_t instr, const uint8_t * buffer, uint8_t data_c)
 {
 	uint8_t cv;
 
@@ -114,30 +112,30 @@ uint8_t dcc_cv_acc_s(uint8_t instr, const uint8_t *buffer, uint8_t data_c)
 	cv = instr & 0x0fu;
 
 	switch (cv) {
-		case 0x0:
-			/* Address 0x0 not available for use */
-			return DCC_ERROR;
-		case 0x2:
-			/* Acceleration value CV#23 */
-			break;
-		case 0x3:
-			/* Deceleration value CV#24: %d */
-			break;
-		case 0x9:
-			/* S-9.2.3, Appendix B */
-			break;
-		default:
-			/* Address is reserved */
-			return DCC_ERROR;
+	case 0x0:
+		/* Address 0x0 not available for use */
+		return DCC_ERROR;
+	case 0x2:
+		/* Acceleration value CV#23 */
+		break;
+	case 0x3:
+		/* Deceleration value CV#24: %d */
+		break;
+	case 0x9:
+		/* S-9.2.3, Appendix B */
+		break;
+	default:
+		/* Address is reserved */
+		return DCC_ERROR;
 	}
 
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_cv_acc_l(uint8_t instr, const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_cv_acc_l(uint8_t instr, const uint8_t * buffer, uint8_t data_c)
 {
-	uint8_t  i_type;
+	uint8_t i_type;
 	uint16_t cv;
 
 	if (data_c < 3) {
@@ -148,36 +146,36 @@ uint8_t dcc_cv_acc_l(uint8_t instr, const uint8_t *buffer, uint8_t data_c)
 
 	i_type = (instr & 0x0Cu) >> 2u;
 	switch (i_type) {
-		case 0x0:
-			/* Reserved for future use */
-			break;
-		case 0x1:
-			/* Verify byte CV# */
-			break;
-		case 0x3:
-			/* Write byte CV# */
-			break;
-		case 0x2:
-			/* Bit manipulation */
-			if (*buffer & 0x10u) {
-				/* CV write bit */
-				// bit = *buffer & 0x07u;
-				// val = *buffer & 0x08u;
-			} else {
-				/* CV verify bit */
-				// bit = *buffer & 0x07u;
-				// val = *buffer & 0x08u;
-			}
-			break;
-		default:
-			break;
+	case 0x0:
+		/* Reserved for future use */
+		break;
+	case 0x1:
+		/* Verify byte CV# */
+		break;
+	case 0x3:
+		/* Write byte CV# */
+		break;
+	case 0x2:
+		/* Bit manipulation */
+		if (*buffer & 0x10u) {
+			/* CV write bit */
+			// bit = *buffer & 0x07u;
+			// val = *buffer & 0x08u;
+		} else {
+			/* CV verify bit */
+			// bit = *buffer & 0x07u;
+			// val = *buffer & 0x08u;
+		}
+		break;
+	default:
+		break;
 	}
 
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_ana_fun_g(const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_ana_fun_g(const uint8_t * buffer, uint8_t data_c)
 {
 	/* Analog Function Group */
 
@@ -185,14 +183,14 @@ uint8_t dcc_ana_fun_g(const uint8_t *buffer, uint8_t data_c)
 		return DCC_ERROR;
 	}
 
-	uint8_t a_out  = *buffer++;
+	uint8_t a_out = *buffer++;
 	uint8_t a_data = *buffer;
 
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_128_speed(const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_128_speed(const uint8_t * buffer, uint8_t data_c)
 {
 	uint8_t dir, speed;
 
@@ -202,14 +200,14 @@ uint8_t dcc_128_speed(const uint8_t *buffer, uint8_t data_c)
 		return DCC_ERROR;
 	}
 
-	dir   = (*buffer & 0x80u) >> 7u;
+	dir = (*buffer & 0x80u) >> 7u;
 	speed = *buffer & 0x7fu;
 
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_fun_21_28(const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_fun_21_28(const uint8_t * buffer, uint8_t data_c)
 {
 	uint8_t fun;
 
@@ -224,8 +222,8 @@ uint8_t dcc_fun_21_28(const uint8_t *buffer, uint8_t data_c)
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_fun_13_20(const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_fun_13_20(const uint8_t * buffer, uint8_t data_c)
 {
 	uint8_t fun;
 
@@ -240,8 +238,8 @@ uint8_t dcc_fun_13_20(const uint8_t *buffer, uint8_t data_c)
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_bin_state_s(const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_bin_state_s(const uint8_t * buffer, uint8_t data_c)
 {
 	uint8_t state, addr;
 
@@ -251,7 +249,7 @@ uint8_t dcc_bin_state_s(const uint8_t *buffer, uint8_t data_c)
 	}
 
 	state = *buffer >> 7u;
-	addr  = *buffer & 0x7fu;
+	addr = *buffer & 0x7fu;
 	if (addr == 0) {
 		/* Set/Reset all binary states */
 	} else {
@@ -261,10 +259,10 @@ uint8_t dcc_bin_state_s(const uint8_t *buffer, uint8_t data_c)
 	return DCC_OK;
 }
 
-// TODO: implement
-uint8_t dcc_bin_state_l(const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_bin_state_l(const uint8_t * buffer, uint8_t data_c)
 {
-	uint8_t  state;
+	uint8_t state;
 	uint16_t addr;
 
 	/* Binary State Control Instruction long form */
@@ -273,7 +271,7 @@ uint8_t dcc_bin_state_l(const uint8_t *buffer, uint8_t data_c)
 	}
 
 	state = *buffer >> 7u;
-	addr  = *buffer++ & 0x7fu;
+	addr = *buffer++ & 0x7fu;
 	addr |= (uint16_t) (*buffer << 7u);
 	if (addr == 0) {
 		/* Set/Reset all binary states */
@@ -284,7 +282,7 @@ uint8_t dcc_bin_state_l(const uint8_t *buffer, uint8_t data_c)
 	return DCC_OK;
 }
 
-// TODO: implement
+/* TODO: implement */
 void dcc_fun_g1(uint8_t instr)
 {
 	uint8_t fun;
@@ -293,10 +291,47 @@ void dcc_fun_g1(uint8_t instr)
 
 	fun = instr & 0x1fu;
 
-	/* FL,F4-F1 */
+	/* F1 */
+	if (fun & 0x01) {
+		HAL_GPIO_WritePin(C_GPIOA_GPIO_Port, C_GPIOA_Pin, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(C_GPIOA_GPIO_Port, C_GPIOA_Pin,
+				  GPIO_PIN_RESET);
+	}
+
+	/* F2 */
+	if (fun & 0x02) {
+		HAL_GPIO_WritePin(C_GPIOB_GPIO_Port, C_GPIOB_Pin, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(C_GPIOB_GPIO_Port, C_GPIOB_Pin,
+				  GPIO_PIN_RESET);
+	}
+
+	/* F3 */
+	if (fun & 0x04) {
+		HAL_GPIO_WritePin(C_AUX1_GPIO_Port, C_AUX1_Pin, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(C_AUX1_GPIO_Port, C_AUX1_Pin, GPIO_PIN_RESET);
+	}
+
+	/* F4 */
+	if (fun & 0x08) {
+		HAL_GPIO_WritePin(C_AUX2_GPIO_Port, C_AUX2_Pin, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(C_AUX2_GPIO_Port, C_AUX2_Pin, GPIO_PIN_RESET);
+	}
+
+	/* FL */
+	/*if (read_cv(29) & 0x02) {
+	   if (fun & 0x10) {
+
+	   } else {
+
+	   }
+	   } */
 }
 
-// TODO: implement
+/* TODO: implement */
 void dcc_fun_g2(uint8_t instr)
 {
 	uint8_t fun;
@@ -308,11 +343,11 @@ void dcc_fun_g2(uint8_t instr)
 	if (fun & 0x10u) {
 		/* F12 - F9 */
 	} else {
- 		/* F8 - F5 */
+		/* F8 - F5 */
 	}
 }
 
-// TODO: implement
+/* TODO: implement */
 /**
  * If Bit 1 of CV#29 is set, bit 4 is used as an intermediate speed step; else
  * it is used to control FL (front headlight)
@@ -322,7 +357,7 @@ void dcc_vel_dir(uint8_t instr)
 	uint8_t dir, speed;
 
 	/* Speed and Direction Instruction */
-	dir   = instr & 0x20u;
+	dir = instr & 0x20u;
 	speed = instr & 0x1fu;
 
 	if ((speed & 0x0f) == 0x00) {
@@ -334,8 +369,8 @@ void dcc_vel_dir(uint8_t instr)
 	}
 }
 
-// TODO: implement
-uint8_t dcc_clamp_speed(const uint8_t *buffer, uint8_t data_c)
+/* TODO: implement */
+uint8_t dcc_clamp_speed(const uint8_t * buffer, uint8_t data_c)
 {
 	uint8_t speed;
 
