@@ -1,0 +1,817 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="6.1.1" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+ <framework name="qpc"/>
+ <package name="decoder" stereotype="0x05">
+  <class name="decoder" superclass="qpc::QMActive">
+   <attribute name="bit_cnt" type="uint8_t" visibility="0x00" properties="0x00">
+    <documentation>/* Number of bits received so far */</documentation>
+   </attribute>
+   <attribute name="rec_byte" type="uint8_t" visibility="0x00" properties="0x00">
+    <documentation>/* Value of the byte under reception */</documentation>
+   </attribute>
+   <attribute name="byte_cnt" type="uint8_t" visibility="0x00" properties="0x00">
+    <documentation>/* Number of bytes received so far */</documentation>
+   </attribute>
+   <attribute name="rx_buffer" type="uint8_t *" visibility="0x00" properties="0x00"/>
+   <statechart properties="0x02">
+    <initial target="../1">
+     <initial_glyph conn="2,2,5,0,6,2">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="init">
+     <tran trig="DECODER_START" target="../../2">
+      <tran_glyph conn="4,12,3,0,24,8">
+       <action box="0,-2,15,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="4,4,20,12"/>
+    </state>
+    <state name="decoding">
+     <entry brief="Start timer, enable EXTI">BSP_StartDCCTimer();</entry>
+     <exit brief="Disable timer and EXTI">BSP_StopDCCTimer();</exit>
+     <initial target="../3">
+      <initial_glyph conn="8,28,4,3,4,4">
+       <action box="0,-2,10,2"/>
+      </initial_glyph>
+     </initial>
+     <tran trig="DECODER_STOP" target="../../1">
+      <tran_glyph conn="4,62,3,1,76,-54,-56">
+       <action box="0,-2,15,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="DECODER_RST" target="..">
+      <tran_glyph conn="24,66,2,2,4,22,-4">
+       <action box="0,2,14,2"/>
+      </tran_glyph>
+     </tran>
+     <state name="preamble">
+      <entry brief="reset bit counter and rx variables">me-&gt;bit_cnt = 0u;
+me-&gt;rec_byte = 0u;
+me-&gt;byte_cnt = 0u;</entry>
+      <tran trig="BIT_0">
+       <choice target="../../../4">
+        <guard brief="len&gt;=11">me-&gt;bit_cnt &gt;= MIN_PREAMBLE_LEN</guard>
+        <choice_glyph conn="26,40,5,3,16">
+         <action box="1,-2,10,2"/>
+        </choice_glyph>
+       </choice>
+       <choice target="../..">
+        <guard brief="len&lt;11">else</guard>
+        <action brief="reset"/>
+        <choice_glyph conn="26,40,4,2,14,4,-2">
+         <action box="1,2,10,2"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="12,40,3,-1,14">
+        <action box="0,-2,8,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="BIT_1">
+       <action brief="increment counter">me-&gt;bit_cnt++;</action>
+       <tran_glyph conn="12,36,3,-1,20">
+        <action box="0,-2,19,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="12,28,26,24">
+       <entry box="1,2,25,2"/>
+      </state_glyph>
+     </state>
+     <state name="byte">
+      <entry brief="Reset bit counter and current byte">me-&gt;bit_cnt = 0u;
+me-&gt;rec_byte = 0u;</entry>
+      <tran trig="BIT_1">
+       <action>me-&gt;bit_cnt++;</action>
+       <choice target="../../../3">
+        <guard brief="8bits">me-&gt;bit_cnt &gt; 8</guard>
+        <action brief="Handle packet">post_dcc_message(me);</action>
+        <choice_glyph conn="54,36,5,3,24,22,-68,-14,2">
+         <action box="1,-2,17,2"/>
+        </choice_glyph>
+       </choice>
+       <choice>
+        <guard brief="else">else</guard>
+        <action>me-&gt;rec_byte &lt;&lt;= 1u;
+me-&gt;rec_byte |= 1u;</action>
+        <choice_glyph conn="54,36,4,-1,4,8">
+         <action box="1,2,6,2"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="42,36,3,-1,12">
+        <action box="0,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="BIT_0">
+       <action>me-&gt;bit_cnt++;</action>
+       <choice target="../..">
+        <guard brief="8bits">me-&gt;bit_cnt &gt; 8</guard>
+        <action brief="Receive next byte">me-&gt;rx_buffer[me-&gt;byte_cnt] = me-&gt;rec_byte;
+
+me-&gt;byte_cnt++;
+
+Q_ASSERT(me-&gt;byte_cnt &lt;= DCC_MAX_PACKET_LEN);</action>
+        <choice_glyph conn="54,46,5,1,22,4,-2">
+         <action box="1,-2,19,2"/>
+        </choice_glyph>
+       </choice>
+       <choice>
+        <guard brief="else">else</guard>
+        <action>me-&gt;rec_byte &lt;&lt;= 1u;</action>
+        <choice_glyph conn="54,46,4,-1,4,8">
+         <action box="1,2,7,2"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="42,46,3,-1,12">
+        <action box="0,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="42,28,32,24">
+       <entry box="1,2,29,4"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="4,20,80,46">
+      <entry box="1,2,31,2"/>
+      <exit box="1,4,31,2"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="88,74"/>
+   </statechart>
+  </class>
+  <directory name=".">
+   <file name="qm_decoder.c">
+    <text>#include &quot;qm_decoder.h&quot;
+#include &quot;decoder.h&quot;
+
+#include &quot;bsp.h&quot;
+
+Q_DEFINE_THIS_MODULE(&quot;Decoder&quot;)
+
+#define MIN_PREAMBLE_LEN    ((uint32_t) 11u)        /* Minimum lenght of the preamble*/
+
+/* PRIVATE VARIABLES DEFINITIONS */
+
+static decoder decoder_inst;
+
+/* PUBLIC VARIABLES DEFINITIONS */
+
+QActive * const ao_decoder = &amp;decoder_inst.super.super;
+
+/* PRIVATE FUNCTIONS DECLARATIONS */
+
+/* PRIVATE FUNCTIONS DEFINITIONS */
+
+$define${decoder::decoder}
+
+/* PUBLIC FUNCTIONS DEFINITIONS */
+
+$define${decoder::decoder_ctor}
+</text>
+   </file>
+   <file name="qm_decoder.h">
+    <text>#ifndef __DECODER_H__
+#define __DECODER_H__
+
+#include &quot;qp_signals.h&quot;
+
+$declare${decoder::decoder}
+
+$declare${decoder::decoder_ctor}
+
+#endif  /* __DECODER_H__ */</text>
+   </file>
+  </directory>
+  <operation name="decoder_ctor" type="uint32_t" visibility="0x00" properties="0x00">
+   <code>uint32_t res = NO_ERROR;
+
+decoder * const me = &amp;decoder_inst;
+
+decoder_reset();
+
+QMActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;decoder_initial));
+
+QS_OBJ_DICTIONARY(ao_decoder);
+QS_SIG_DICTIONARY(DECODER_START_SIG, me);
+QS_SIG_DICTIONARY(DECODER_STOP_SIG, me);
+QS_SIG_DICTIONARY(DECODER_RST_SIG, me);
+
+decoder_aux_dict();
+
+return res;</code>
+  </operation>
+ </package>
+ <package name="controller" stereotype="0x05">
+  <class name="controller" superclass="qpc::QMActive">
+   <statechart properties="0x02">
+    <initial target="../2">
+     <initial_glyph conn="2,2,5,0,10,2">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="error">
+     <entry brief="Signal error to other SM">static const QEvt motor_e_break_evt = {EMERGENCY_BRAKE_SIG, 0u, 0u};
+
+QACTIVE_POST(ao_motor, &amp;motor_e_break_evt, me);</entry>
+     <state_glyph node="50,4,26,28">
+      <entry box="1,2,23,2"/>
+     </state_glyph>
+    </state>
+    <state name="operation">
+     <initial target="../1">
+      <initial_glyph conn="6,8,5,0,10,2">
+       <action box="0,-2,10,2"/>
+      </initial_glyph>
+     </initial>
+     <state name="startup">
+      <entry brief="self test;">/* TODO: Implement POST */
+
+/* TODO: Remove after testing */
+static const QEvt evt = QEVT_INITIALIZER(CNTRL_RECONFIGURE_SIG);
+
+QACTIVE_POST(ao_controller, &amp;evt, me);</entry>
+      <tran trig="CNTRL_RECONFIGURE">
+       <action brief="Read configuration">uint32_t status = NO_ERROR;</action>
+       <choice target="../../../../1">
+        <guard brief="Config error">NO_ERROR != status</guard>
+        <choice_glyph conn="34,28,5,3,16">
+         <action box="2,-2,10,2"/>
+        </choice_glyph>
+       </choice>
+       <choice target="../../../2">
+        <guard brief="noerror">else</guard>
+        <choice_glyph conn="34,28,4,0,8">
+         <action box="0,2,10,2"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="8,20,3,-1,26,8">
+        <action box="0,-2,32,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="8,10,34,14">
+       <entry box="1,2,25,4"/>
+      </state_glyph>
+     </state>
+     <state name="ready">
+      <entry brief="enable decoding of messages;\start other SM">/* TODO: Correct to the right Evt type */
+static const QEvt evt = QEVT_INITIALIZER(DECODER_START_SIG);
+
+QACTIVE_POST(ao_decoder, &amp;evt, me);</entry>
+      <tran trig="DCC_MESSAGE">
+       <action brief="decode message"/>
+       <tran_glyph conn="8,46,3,-1,30">
+        <action box="0,-2,28,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="8,36,34,20">
+       <entry box="1,2,31,4"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="4,4,42,56"/>
+    </state>
+    <state_diagram size="80,64"/>
+   </statechart>
+  </class>
+  <operation name="controller_ctor" type="uint32_t" visibility="0x00" properties="0x00">
+   <code>uint32_t res = NO_ERROR;
+
+controller * const me = &amp;controller_inst;
+
+QMActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;controller_initial));
+
+QS_OBJ_DICTIONARY(ao_controller);
+QS_SIG_DICTIONARY(CNTRL_RECONFIGURE_SIG, me);
+QS_SIG_DICTIONARY(DCC_MESSAGE_SIG, me);
+
+return res;</code>
+  </operation>
+  <package name="package" stereotype="0x01">
+   <class name="dcc_message" superclass="qpc::QEvt">
+    <attribute name="data[DCC_MAX_PACKET_LEN];" type="uint8_t" visibility="0x00" properties="0x00"/>
+    <attribute name="size" type="uint8_t" visibility="0x00" properties="0x00"/>
+   </class>
+  </package>
+  <directory name=".">
+   <file name="qm_controller.c">
+    <text>#include &quot;qm_controller.h&quot;
+
+Q_DEFINE_THIS_MODULE(&quot;Controller&quot;)
+
+/* PRIVATE VARIABLES DEFINITIONS */
+
+static controller controller_inst;
+
+/* PUBLIC VARIABLES DEFINITIONS */
+
+QActive * const ao_controller = &amp;controller_inst.super.super;
+
+/* PRIVATE FUNCTIONS DECLARATIONS */
+
+/* AO DEFINITIONS */
+
+$define${controller}
+</text>
+   </file>
+   <file name="qm_controller.h">
+    <text>#ifndef __CONTROLLER_H__
+#define __CONTROLLER_H__
+
+#include &quot;qp_signals.h&quot;
+
+$declare${controller}
+
+#endif  /* __CONTROLLER_H__ */
+</text>
+   </file>
+  </directory>
+ </package>
+ <package name="motor" stereotype="0x05">
+  <package name="package" stereotype="0x01">
+   <class name="motor_config">
+    <attribute name="v_start" type="uint8_t" visibility="0x00" properties="0x00">
+     <documentation>/* CV#2: Vstart */</documentation>
+    </attribute>
+    <attribute name="acc_rate" type="uint8_t" visibility="0x00" properties="0x00">
+     <documentation>/* CV#3: Acceleration Rate */</documentation>
+    </attribute>
+    <attribute name="dec_rate" type="uint8_t" visibility="0x00" properties="0x00">
+     <documentation>/* CV#4: Deceleration Rate */</documentation>
+    </attribute>
+    <attribute name="pwm_t" type="uint8_t" visibility="0x00" properties="0x00">
+     <documentation>/* CV#9: Total PWM Period */</documentation>
+    </attribute>
+    <attribute name="acc_adj" type="uint8_t" visibility="0x00" properties="0x00">
+     <documentation>/* CV#23: Acceleration Adjustment */</documentation>
+    </attribute>
+    <attribute name="dec_adj" type="uint8_t" visibility="0x00" properties="0x00">
+     <documentation>/* CV#24: Deceleration Adjustment */</documentation>
+    </attribute>
+    <attribute name="speed_tab[28]" type="uint8_t" visibility="0x00" properties="0x00">
+     <documentation>/* CV#67-94: Speed Table */</documentation>
+    </attribute>
+   </class>
+   <class name="motor_cfg_evt" superclass="qpc::QEvt">
+    <documentation>/* Event used to configure the motor AO */</documentation>
+    <attribute name="config" type="motor_config" visibility="0x00" properties="0x00"/>
+   </class>
+   <class name="speed_evt" superclass="qpc::QEvt">
+    <documentation>/* Event used to Set/Update the speed of the motor */</documentation>
+    <attribute name="speed" type="int16_t" visibility="0x00" properties="0x00"/>
+    <attribute name="direction" type="uint8_t" visibility="0x00" properties="0x00"/>
+   </class>
+  </package>
+  <class name="motor" superclass="qpc::QMActive">
+   <attribute name="accel_timer" type="QTimeEvt" visibility="0x02" properties="0x00">
+    <documentation>/* Acceleration/deceleration timer */</documentation>
+   </attribute>
+   <attribute name="speed_table_len" type="uint16_t" visibility="0x02" properties="0x00"/>
+   <attribute name="speed_table" type="uint8_t const *" visibility="0x02" properties="0x00"/>
+   <attribute name="configuration" type="motor_config *" visibility="0x02" properties="0x00">
+    <documentation>/* Motor configuration */</documentation>
+   </attribute>
+   <attribute name="accel_t" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>/* Period between two speed steps during acceleration [ms] */</documentation>
+   </attribute>
+   <attribute name="decel_t" type="uint32_t" visibility="0x02" properties="0x00">
+    <documentation>/* Period between two speed steps during deceleration     [ms] */</documentation>
+   </attribute>
+   <attribute name="pwm_arr" type="uint32_t" visibility="0x02" properties="0x00"/>
+   <attribute name="actual_step" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/* Actual speed steps. When microstepping, it's the _lower_ step */</documentation>
+   </attribute>
+   <attribute name="next_step" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/* Next step: substepping will move towards this value */</documentation>
+   </attribute>
+   <attribute name="target_step" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/* Target speed step */</documentation>
+   </attribute>
+   <attribute name="substp_cnt" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/* Substep counter, used for substepping */</documentation>
+   </attribute>
+   <attribute name="substp_num" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/* Number of substeps for the current substepping sequence */</documentation>
+   </attribute>
+   <attribute name="substp_lsr" type="uint8_t" visibility="0x02" properties="0x00">
+    <documentation>/* Shif factor for computing substep PWM duty cycle */</documentation>
+   </attribute>
+   <attribute name="delta_pwm" type="uint16_t" visibility="0x02" properties="0x00">
+    <documentation>/* Difference in pwm value between actual and next speed step */</documentation>
+   </attribute>
+   <attribute name="actual_pwm" type="uint16_t" visibility="0x02" properties="0x00">
+    <documentation>/* Base PWM value used for substepping */</documentation>
+   </attribute>
+   <attribute name="accel_dir" type="enum acceleration_dir" visibility="0x02" properties="0x00">
+    <documentation>/* Direction of stepping and substepping */</documentation>
+   </attribute>
+   <attribute name="t_substp" type="uint16_t" visibility="0x00" properties="0x00">
+    <documentation>/* time in milliseconds between substeps */</documentation>
+   </attribute>
+   <attribute name="direction" type="enum motor_direction" visibility="0x02" properties="0x00"/>
+   <attribute name="zeroCrossingQueue" type="QEQueue" visibility="0x02" properties="0x00">
+    <documentation>/* Queue used to store CHANGE_SPEED event that requires reversal of direction */</documentation>
+   </attribute>
+   <statechart properties="0x02">
+    <initial target="../1">
+     <initial_glyph conn="5,2,5,0,7,2">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="operation">
+     <initial target="../2">
+      <initial_glyph conn="7,13,5,0,5,3">
+       <action box="0,-2,10,2"/>
+      </initial_glyph>
+     </initial>
+     <tran trig="CATCH_ALL" target="../../2">
+      <action brief="Unexpected events are treated as errors"/>
+      <tran_glyph conn="4,10,3,3,88">
+       <action box="0,-2,47,2"/>
+      </tran_glyph>
+     </tran>
+     <state name="init">
+      <tran trig="MOTOR_CONFIG">
+       <action brief="configure motor controller">uint32_t err = NO_ERROR;
+
+err = configure_motor(me, e);</action>
+       <choice target="../../../../2">
+        <guard brief="error">NO_ERROR != err</guard>
+        <choice_glyph conn="36,22,4,3,-8,56">
+         <action box="2,-10,10,2"/>
+        </choice_glyph>
+       </choice>
+       <choice target="../../../3">
+        <guard brief="else">else</guard>
+        <choice_glyph conn="36,22,5,3,10">
+         <action box="2,-2,7,2"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="8,22,3,-1,28">
+        <action box="0,-2,22,4"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="8,16,24,10"/>
+     </state>
+     <state name="configured">
+      <tran trig="MOTOR_CTRL_START" target="../../4">
+       <tran_glyph conn="46,22,3,0,30,8">
+        <action box="0,-2,22,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="46,16,24,10"/>
+     </state>
+     <state name="running">
+      <entry brief="enable motor driver"/>
+      <exit brief="disable motor driver"/>
+      <initial target="../5">
+       <initial_glyph conn="11,51,5,0,7,3">
+        <action box="0,-2,10,2"/>
+       </initial_glyph>
+      </initial>
+      <tran trig="MOTOR_CTRL_RECONFIGURE" target="../../3">
+       <tran_glyph conn="8,39,3,1,77,-19,-15">
+        <action box="0,-2,24,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="EMERGENCY_BRAKE" target="../5/0">
+       <action>/* Flush the queue since an emergency brake has been requested.
+ * This prevents event being posted by entering the super-state &quot;stop&quot; */
+QActive_flushDeferred(ao_motor, &amp;me-&gt;zeroCrossingQueue, Q_DIM(zcQueue));</action>
+       <tran_glyph conn="8,48,3,0,32,12">
+        <action box="0,-2,20,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="CHANGE_SPEED">
+       <action brief="Smoothly transition to desired speed">speed_evt const * const s_evt = Q_EVT_CAST(speed_evt);
+
+/* Flush the queue since a newer value has been requested */
+QActive_flushDeferred(ao_motor, &amp;me-&gt;zeroCrossingQueue, Q_DIM(zcQueue));
+
+/* Is the motor stopped? (Stop or E-Stop) */
+if (0u == me-&gt;speed_table[me-&gt;actual_step]) {
+
+    /* Yes, simply update target speed and direction */
+    me-&gt;target_step = s_evt-&gt;speed;
+    me-&gt;direction = s_evt-&gt;direction;
+
+} else if (s_evt-&gt;direction == me-&gt;direction) {
+
+    /* When direction is the same, simply update target speed */
+    me-&gt;target_step = s_evt-&gt;speed;
+
+}
+else {
+
+    /* When direction is different, first stop */
+    me-&gt;target_step = 0u;
+
+    /* Defer this event for when entering the stop state */
+    QActive_defer(ao_motor, &amp;me-&gt;zeroCrossingQueue, e);
+
+}</action>
+       <choice target="../../6">
+        <guard brief="else">else</guard>
+        <choice_glyph conn="60,42,5,1,18,50,-4">
+         <action box="1,-2,8,2"/>
+        </choice_glyph>
+       </choice>
+       <choice>
+        <guard brief="at_speed">is_at_speed(me)</guard>
+        <action brief="ignore"/>
+        <choice_glyph conn="60,42,4,-1,4,15">
+         <action box="1,2,14,2"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="8,42,3,-1,52">
+        <action box="0,-2,47,2"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="SET_SPEED" target="../7">
+       <action brief="Instantly change speed">speed_evt const * const s_evt = Q_EVT_CAST(speed_evt);
+
+Q_REQUIRE(s_evt-&gt;speed &lt; SPEED_STEPS);
+
+me-&gt;actual_step = s_evt-&gt;speed;
+me-&gt;direction = s_evt-&gt;direction;
+
+motor_reset_substeps(me);
+
+motor_pwm_set(me-&gt;actual_pwm);
+motor_dir_set(me-&gt;direction);</action>
+       <tran_glyph conn="8,45,3,0,50,9">
+        <action box="0,-2,34,2"/>
+       </tran_glyph>
+      </tran>
+      <state name="stop">
+       <entry brief="Set speed to zero">/* Recall events, if any, that requested an inversion */
+QActive_recall(ao_motor, &amp;me-&gt;zeroCrossingQueue);
+
+//motor_speed_set(0);</entry>
+       <state name="e_stop">
+        <entry brief="Disable motor driver, fast decay">emergency_brake();</entry>
+        <exit brief="Enable motor driver"/>
+        <tran trig="EMERGENCY_BRAKE_RELEASE" target="../..">
+         <tran_glyph conn="16,70,3,1,32">
+          <action box="0,-2,25,2"/>
+         </tran_glyph>
+        </tran>
+        <tran trig="CATCH_ALL">
+         <action brief="prevent any actions while in e-stop"/>
+         <tran_glyph conn="16,73,3,-1,23">
+          <action box="0,-2,23,4"/>
+         </tran_glyph>
+        </tran>
+        <state_glyph node="16,60,28,16">
+         <entry box="1,2,27,4"/>
+         <exit box="1,6,27,2"/>
+        </state_glyph>
+       </state>
+       <state_glyph node="12,54,36,26">
+        <entry box="1,2,23,2"/>
+       </state_glyph>
+      </state>
+      <state name="change">
+       <entry brief="Arm acceleration/deceleration timers">/* New speed is not the actual speed (or substep counter is not zeor)
+ * so update substepping parameters
+ */
+compute_substep_param(me);
+
+/* Arm the timer */
+QTimeEvt_armX(&amp;me-&gt;accel_timer, me-&gt;t_substp, me-&gt;t_substp);</entry>
+       <exit brief="Disarm speed changing timers">QTimeEvt_disarm(&amp;me-&gt;accel_timer);</exit>
+       <tran trig="SPEED_REACHED" target="../../7">
+        <tran_glyph conn="12,102,3,2,58,-22">
+         <action box="0,-2,18,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="MOTOR_STOPPED" target="../../5">
+        <tran_glyph conn="12,98,3,2,28,-18">
+         <action box="0,-2,14,2"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="SPEED_TIMER">
+        <action brief="Move towards target speed">static QEvt const stopped = {MOTOR_STOPPED_SIG, 0u, 0u};
+static QEvt const cruise = {SPEED_REACHED_SIG, 0u, 0u};
+QEvt const * evt = NULL;
+uint16_t pwm = 0u;
+
+/* Change actual speed towards the desired speed cruise */
+/* 1. Acceleration or Deceleration? */
+if (SPEED_INCREASE == me-&gt;accel_dir) {
+    me-&gt;substp_cnt++;
+} else {
+    me-&gt;substp_cnt--;
+}
+
+/* 2. Compute PWM duty cycle */
+pwm = me-&gt;actual_pwm + ((me-&gt;substp_cnt * me-&gt;delta_pwm) &gt;&gt; me-&gt;substp_lsr);
+
+/* 3. And set it in the peripheral */
+motor_dir_set(me-&gt;direction);
+motor_pwm_set(pwm);
+
+/* 4. Integer speed reached? */
+if (((me-&gt;substp_cnt == me-&gt;substp_num) &amp;&amp; (SPEED_INCREASE == me-&gt;accel_dir)) ||
+    ((0u == me-&gt;substp_cnt) &amp;&amp; (SPEED_DECREASE == me-&gt;accel_dir))) {
+
+    /* 5. Update actual speed step */
+    me-&gt;actual_step = me-&gt;next_step;
+
+    /* 6. Target speed reached? */
+    if (me-&gt;actual_step == me-&gt;target_step) {
+
+        /* 6A. Yes, send speed_reached/stopped signal */
+        if (0u == me-&gt;speed_table[me-&gt;actual_step]) {
+            evt = &amp;stopped;
+        } else {
+            evt = &amp;cruise;
+        }
+        QACTIVE_POST(ao_motor, evt, ao_motor);
+    } else {
+
+        /* 6B. No, compute the parameters for next sub-stepping sequence*/
+        compute_substep_param(me);
+
+        /* 7. Re-arm the timer */
+        QTimeEvt_rearm(&amp;me-&gt;accel_timer, me-&gt;t_substp);
+    }
+}</action>
+        <tran_glyph conn="12,106,3,-1,40">
+         <action box="0,-2,36,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="12,88,62,22">
+        <entry box="1,2,43,2"/>
+        <exit box="1,4,43,2"/>
+       </state_glyph>
+      </state>
+      <state name="cruise">
+       <state_glyph node="54,54,20,26"/>
+      </state>
+      <state_glyph node="8,30,74,90">
+       <entry box="1,2,29,2"/>
+       <exit box="1,4,29,2"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="4,4,84,120"/>
+    </state>
+    <state name="error">
+     <entry brief="Disable motor driver"/>
+     <state_glyph node="92,4,20,28">
+      <entry box="1,2,17,2"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="116,128"/>
+   </statechart>
+  </class>
+  <operation name="motor_ctor" type="uint32_t" visibility="0x00" properties="0x00">
+   <documentation>/* Constructor for Motor controller AO */</documentation>
+   <code>uint32_t res = NO_ERROR;
+
+motor * const me = &amp;motor_inst;
+
+QMActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;motor_initial));
+
+me-&gt;actual_step = 0u;
+me-&gt;target_step = 0u;
+me-&gt;next_step = 0u;
+me-&gt;direction = DIRECTION_FORWARD;
+me-&gt;accel_dir = MOTOR_ACCELERATION;
+
+QTimeEvt_ctorX(&amp;me-&gt;accel_timer, ao_motor, SPEED_TIMER_SIG, ACCEL_TICK_RATE);
+
+QEQueue_init(&amp;me-&gt;zeroCrossingQueue, zcQueue, Q_DIM(zcQueue));
+
+QS_OBJ_DICTIONARY(ao_motor);
+
+QS_SIG_DICTIONARY(MOTOR_CONFIG_SIG, me);
+QS_SIG_DICTIONARY(MOTOR_CTRL_START_SIG, me);
+QS_SIG_DICTIONARY(MOTOR_CTRL_RECONFIGURE_SIG, me);
+QS_SIG_DICTIONARY(CHANGE_SPEED_SIG, me);
+QS_SIG_DICTIONARY(SET_SPEED_SIG, me);
+QS_SIG_DICTIONARY(EMERGENCY_BRAKE_SIG, me);
+QS_SIG_DICTIONARY(MOTOR_STOPPED_SIG, me);
+QS_SIG_DICTIONARY(SPEED_REACHED_SIG, me);
+QS_SIG_DICTIONARY(SPEED_TIMER_SIG, me);
+
+return res;</code>
+  </operation>
+  <directory name=".">
+   <file name="qm_motor.c">
+    <text>#include &quot;qm_motor.h&quot;
+#include &quot;motor.h&quot;
+
+Q_DEFINE_THIS_MODULE(&quot;QM_Motor&quot;)
+
+#define ACCEL_TIMER_PERIOD ((uint32_t) 10u)    /* 10 ms */
+#define ACCEL_TICK_RATE    ((uint8_t) 0u)      /* 1 ms tick rate */
+#define MOTOR_ACCELERATION ((int16_t) 1)       /* To be defined */
+
+/* PRIVATE VARIABLES DEFINITIONS */
+
+static motor motor_inst;
+
+static QEvt const * zcQueue[1u];
+
+/* PUBLIC VARIABLES DEFINITIONS */
+
+QActive * const ao_motor = &amp;motor_inst.super.super;
+
+/* PRIVATE FUNCTIONS DECLARATIONS */
+
+uint32_t motor_speed_set(int16_t speed);
+
+/* PRIVATE FUNCTIONS DEFINITIONS */
+
+$define${motor}
+
+/* PUBLIC FUNCTIONS DEFINITIONS */</text>
+   </file>
+   <file name="qm_motor.h">
+    <text>#ifndef __MOTOR_H__
+#define __MOTOR_H__
+
+#include &quot;qp_signals.h&quot;
+
+/**/
+
+#define SPEED_STEPS ((uint8_t) 28u)
+
+enum motor_direction {
+    DIRECTION_BACKWARD = 0u,
+    DIRECTION_FORWARD = 1u
+};
+
+enum acceleration_dir {
+    SPEED_INCREASE = 0u,
+    SPEED_DECREASE
+};
+
+$declare${motor}
+
+#endif  /* __MOTOR_H__ */
+</text>
+   </file>
+  </directory>
+ </package>
+ <package name="functions" stereotype="0x05">
+  <class name="functions" superclass="qpc::QMActive">
+   <statechart properties="0x02">
+    <initial target="../1">
+     <initial_glyph conn="2,2,5,0,8,4">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="PORTA_CHIUSA">
+     <history type="deep" target="../3">
+      <history_glyph conn="32,11,1,0,-10,9"/>
+     </history>
+     <tran trig="SEGANLE PORTA APERTA" target="../../2">
+      <tran_glyph conn="32,30,1,3,18">
+       <action box="0,-2,16,4"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="ACCENDI" target="../3">
+      <tran_glyph conn="4,16,3,0,14,4">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state name="ACCESO">
+      <entry brief="Accende la resistenza"/>
+      <exit brief="Spegne la resistenza"/>
+      <tran trig="SPEGNI" target="../..">
+       <tran_glyph conn="6,30,3,2,23,8">
+        <action box="0,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="6,20,20,14">
+       <entry box="1,2,17,2"/>
+       <exit box="1,4,17,2"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="4,6,28,32"/>
+    </state>
+    <state name="PORTA_APERTA">
+     <entry brief="Accendi la luce"/>
+     <exit brief="Spegni la luce"/>
+     <tran trig="SEGNALE PORTA CHIUSA" target="../../1" cpref="../../1/0">
+      <tran_glyph conn="50,16,3,1,-16,-5,-2">
+       <action box="-16,-2,13,4"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="50,6,26,32">
+      <entry box="1,2,23,2"/>
+      <exit box="1,4,24,2"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="80,50"/>
+   </statechart>
+  </class>
+  <directory name=".">
+   <file name="qm_functions.c">
+    <text>#include &quot;qp_signals.h&quot;
+
+$declare${functions::functions}
+
+$define${functions::functions}</text>
+   </file>
+  </directory>
+ </package>
+</model>

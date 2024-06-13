@@ -10,6 +10,7 @@
 #include "cv.h"
 #include "config.h"
 #include "main.h"
+#include "bsp.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -292,34 +293,16 @@ void dcc_fun_g1(uint8_t instr)
 	fun = instr & 0x1fu;
 
 	/* F1 */
-	if (fun & 0x01) {
-		HAL_GPIO_WritePin(C_GPIOA_GPIO_Port, C_GPIOA_Pin, GPIO_PIN_SET);
-	} else {
-		HAL_GPIO_WritePin(C_GPIOA_GPIO_Port, C_GPIOA_Pin,
-				  GPIO_PIN_RESET);
-	}
+	BSP_SetGPIOA_pin((fun & 0x01u) != 0u ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
 	/* F2 */
-	if (fun & 0x02) {
-		HAL_GPIO_WritePin(C_GPIOB_GPIO_Port, C_GPIOB_Pin, GPIO_PIN_SET);
-	} else {
-		HAL_GPIO_WritePin(C_GPIOB_GPIO_Port, C_GPIOB_Pin,
-				  GPIO_PIN_RESET);
-	}
+	BSP_SetGPIOB_pin((fun & 0x02u) != 0u ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
 	/* F3 */
-	if (fun & 0x04) {
-		HAL_GPIO_WritePin(C_AUX1_GPIO_Port, C_AUX1_Pin, GPIO_PIN_SET);
-	} else {
-		HAL_GPIO_WritePin(C_AUX1_GPIO_Port, C_AUX1_Pin, GPIO_PIN_RESET);
-	}
+	BSP_SetAUX1_pin((fun & 0x04u) != 0u ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
 	/* F4 */
-	if (fun & 0x08) {
-		HAL_GPIO_WritePin(C_AUX2_GPIO_Port, C_AUX2_Pin, GPIO_PIN_SET);
-	} else {
-		HAL_GPIO_WritePin(C_AUX2_GPIO_Port, C_AUX2_Pin, GPIO_PIN_RESET);
-	}
+	BSP_SetAUX2_pin((fun & 0x08u) != 0u ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
 	/* FL */
 	/*if (read_cv(29) & 0x02) {

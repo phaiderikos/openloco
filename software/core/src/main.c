@@ -1,125 +1,103 @@
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+/*******************************************************************************
+ * @file    :   main.c
+ * @brief   :   Main application file
+ * @author  :   Davide Campagna
+ * @date    :   May 15, 2024
+ * @version :   V1.0
+ ******************************************************************************/
 
 #include "main.h"
-#include "tim.h"
-#include "gpio.h"
+#include "bsp.h"
 
 #include "decoder.h"
+#include "qp_signals.h"
 
-extern struct decoder dec1;
+#include "qm_decoder.h"
+#include "qm_controller.h"
+#include "qm_motor.h"
 
-void SystemClock_Config(void);
+Q_DEFINE_THIS_MODULE("main")
+
+#define SMALL_POOL_SIZE		(64u)
+#define MEDIUM_POOL_SIZE	(32u)
+#define LARGE_POOL_SIZE		(16u)
+
+static QEvt const * motor_queue[32u];
+static QEvt const * controller_queue[32u];
+static QEvt const * decoder_queue[32u];
+
+static speed_evt small_pool_sto[SMALL_POOL_SIZE];
+static motor_cfg_evt large_pool_sto[LARGE_POOL_SIZE];
 
 /**
  * @brief  The application entry point.
- * @retval int
+ *
+ * @retval unused (int):
+ * 		main function never returns
  */
 int main(void)
 {
+	/* Active Objects priorities ---------------------------------------- */
+	enum {
+		/* Lower priority */
+		QF_MOTOR_PRIO = 1u,
+		QF_CONTROLLER_PRIO,
+		QF_DECODER_PRIO
+		/* Higher priority */
+	};
 
-	/* MCU Configuration-------------------------------------------------------- */
+	/* MCU Configuration ------------------------------------------------ */
+	BSP_Init();
 
-	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	HAL_Init();
+	/* QF INITIALIZATION */
 
-	/* Configure the system clock */
-	SystemClock_Config();
+	QF_init();	/* Initialise the framework and the underlying RT kernel */
 
-	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
+	QF_poolInit(small_pool_sto, sizeof(small_pool_sto), sizeof(small_pool_sto[0]));
+	QF_poolInit(large_pool_sto, sizeof(large_pool_sto), sizeof(large_pool_sto[0]));
 
-	MX_TIM2_Init();
-	MX_TIM22_Init();
+	/* Call the constructor of the active objects */
+	decoder_ctor();
 
-	decoder_reset(&dec1);
+	motor_ctor();
 
-	HAL_TIM_Base_Start_IT(&htim2);
+	controller_ctor();
 
-	while (1) {
+	/* Start the active objects */
+	QACTIVE_START(	ao_motor,					/* Pointer to Motor AO to start				*/
+			QF_MOTOR_PRIO,					/* AO priority						*/
+			motor_queue, Q_DIM(motor_queue),		/* Storage and size of event queue for Motor AO		*/
+			(void *)0u, 0u,					/* No stack space is used in QV				*/
+			(QEvt *)0u);					/* No initial event					*/
 
-	}
-}
+	QACTIVE_START(	ao_decoder,					/* Pointer to Decoder AO to start			*/
+			QF_DECODER_PRIO,				/* AO priority						*/
+			decoder_queue, Q_DIM(decoder_queue),		/* Storage and size of event queue for Controller AO	*/
+			(void *)0u, 0u,					/* No stack space is used in QV				*/
+			(QEvt *)0u);					/* No initial event					*/
 
-/**
- * @brief System Clock Configuration
- * @retval None
- */
-void SystemClock_Config(void)
-{
-	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
-	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+	QACTIVE_START(	ao_controller,					/* Pointer to Controller AO to start 			*/
+			QF_CONTROLLER_PRIO,				/* AO priority 						*/
+			controller_queue, Q_DIM(controller_queue),	/* Storage and size of event queue for Controller AO 	*/
+			(void *)0u, 0u,					/* No stack space is used in QV 			*/
+			(QEvt *)0u);					/* No initial event 					*/
 
-	/** Configure the main internal regulator output voltage
-	*/
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-	/** Initializes the RCC Oscillators according to the specified parameters
-	* in the RCC_OscInitTypeDef structure.
-	*/
-	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-	RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-	RCC_OscInitStruct.PLL.PLLMUL = RCC_PLLMUL_4;
-	RCC_OscInitStruct.PLL.PLLDIV = RCC_PLLDIV_2;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
-		Error_Handler();
-	}
-
-	/** Initializes the CPU, AHB and APB buses clocks
-	*/
-	RCC_ClkInitStruct.ClockType =
-	    RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 |
-	    RCC_CLOCKTYPE_PCLK2;
-	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) !=
-	    HAL_OK) {
-		Error_Handler();
-	}
-}
-
-/**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
-void Error_Handler(void)
-{
-	__disable_irq();
-	while (1) {
+	for (;;) {
+		QF_run();
 	}
 }
 
 #ifdef  USE_FULL_ASSERT
-
 /**
  * @brief  Reports the name of the source file and the source line number
  *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
+ * @param  file(uint8_t *):
+ * 		pointer to the source file name
+ * @param  line(uint32_t):
+ * 		error line
  */
 void assert_failed(uint8_t * file, uint32_t line)
 {
-
+	Q_onError((char *)file, line);
 }
 #endif	/* USE_FULL_ASSERT */

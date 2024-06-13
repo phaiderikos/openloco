@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "qm_decoder.h"
+
 #define DCC_DCCI        0x00     // Decoder and Consist Control Instruction
 #define DCC_AOI         0x20     // Advanced Operation Instructions
 #define DCC_SDIR        0x40     // Speed and Direction Instruction for reverse operation
@@ -21,22 +23,12 @@
 #define DCC_FE          0xC0     // Feature Expansion
 #define DCC_CVAI        0xE0     // Configuration Variable Access Instruction
 
+void decoder_aux_dict(void);
 
-struct decoder
-{
-	uint8_t bytes[16];
-	uint8_t N, byte_n;
-	uint8_t actual_byte;
-	uint16_t T_prev;
-	bool half0, half1, has_preamble;
-};
-
-void decoder_reset(struct decoder *dec);
-
-void decoder_end(struct decoder *dec);
+void decoder_reset(void);
 
 uint8_t decode(const uint8_t *buffer, uint8_t len, uint8_t check);
 
-void interrupt_funct(uint16_t T);
+void post_dcc_message(decoder const * const me);
 
 #endif //__DCC_DECODER_H

@@ -20,7 +20,8 @@
 
 #include "decoder.h"
 
-extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef * const tim_dcc;
+extern TIM_HandleTypeDef * const tim_tick;
 
 /******************************************************************************/
 /*           Cortex-M0+ Processor Interruption and Exception Handlers          */
@@ -58,14 +59,6 @@ void PendSV_Handler(void)
 {
 }
 
-/**
-  * @brief This function handles System tick timer.
-  */
-void SysTick_Handler(void)
-{
-	HAL_IncTick();
-}
-
 /******************************************************************************/
 /* STM32L0xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
@@ -78,23 +71,11 @@ void SysTick_Handler(void)
   */
 void EXTI4_15_IRQHandler(void)
 {
-	if (DCC_DATA_GPIO_Port->IDR & DCC_DATA_Pin){
-		uint16_t val = htim2.Instance->CNT;
-		htim2.Instance->CNT = 0;
+	GPIOA->BRR |= GPIO_PIN_3;
 
-		interrupt_funct(val);
-	}
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
 
-	HAL_GPIO_EXTI_IRQHandler(DCC_DATA_Pin);
+	GPIOA->BSRR |= GPIO_PIN_3;
 }
 
-/**
-  * @brief This function handles TIM2 global interrupt.
-  */
-void TIM2_IRQHandler(void)
-{
-	HAL_TIM_IRQHandler(&htim2);
 
-	/* Overflow: reset the receiver */
-	interrupt_funct(65535);
-}

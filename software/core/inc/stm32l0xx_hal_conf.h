@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file    stm32l0xx_hal_conf.h
@@ -17,9 +18,18 @@
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM32L0xx_HAL_CONF_H
 #define __STM32L0xx_HAL_CONF_H
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
 
 /* ########################## Module Selection ############################## */
 /**
@@ -43,7 +53,7 @@
 /*#define HAL_SPI_MODULE_ENABLED   */
 #define HAL_TIM_MODULE_ENABLED
 /*#define HAL_TSC_MODULE_ENABLED   */
-/*#define HAL_UART_MODULE_ENABLED   */
+#define HAL_UART_MODULE_ENABLED
 /*#define HAL_USART_MODULE_ENABLED   */
 /*#define HAL_IRDA_MODULE_ENABLED   */
 /*#define HAL_SMARTCARD_MODULE_ENABLED   */
@@ -312,5 +322,8 @@
   #define assert_param(expr) ((void)0U)
 #endif /* USE_FULL_ASSERT */
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __STM32L0xx_HAL_CONF_H */

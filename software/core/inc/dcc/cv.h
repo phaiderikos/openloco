@@ -22,7 +22,10 @@
 #define CV_BANK1_OK_ADDR		(CV_BANK1_END_ADDR + 1)
 #define CV_BANK2_START_ADDR		(CV_BANK1_OK_ADDR + 4)
 #define CV_BANK2_END_ADDR		(CV_BANK2_START_ADDR + LAST_CV_NUM - 1)
-#define CV_BANK2_OK_ADDR		(CV_BANK2_END_ADDR + 4)
+#define CV_BANK2_OK_ADDR		(CV_BANK2_END_ADDR + 1)
+
+_Static_assert(CV_BANK2_OK_ADDR + 3 < EEPROM_START_ADDR + EEPROM_SIZE, "Memory for CVs exceeds boundaries of data EEPROM.");
+_Static_assert(LAST_CV_NUM % 4 == 0, "CV count must be a multiple of 4.");
 
 enum cv_op_result {CV_OP_OK, CV_OP_ERROR} ;
 
