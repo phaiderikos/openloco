@@ -1,4 +1,21 @@
+# Build directory
 /build/
+
+# KDev4 files
 /.kdev4/
 software.kdev4
+
+# CubeMX temporary files
 .mxproject
+
+# STM32CubeIDE files
+/.settings/
+/.project
+/.cproject
+
+/DCC_Decoder_*.cfg
+/DCC_Decoder_*.launch
+
+# QM settings
+**/qm/*.qms
+

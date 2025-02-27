@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.1.1" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="7.0.0" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <framework name="qpc"/>
  <package name="decoder" stereotype="0x05">
   <class name="decoder" superclass="qpc::QMActive">
@@ -74,7 +74,7 @@ me-&gt;byte_cnt = 0u;</entry>
        </tran_glyph>
       </tran>
       <state_glyph node="12,28,26,24">
-       <entry box="1,2,25,2"/>
+       <entry box="0,3,25,2"/>
       </state_glyph>
      </state>
      <state name="byte">
@@ -126,12 +126,12 @@ Q_ASSERT(me-&gt;byte_cnt &lt;= DCC_MAX_PACKET_LEN);</action>
        </tran_glyph>
       </tran>
       <state_glyph node="42,28,32,24">
-       <entry box="1,2,29,4"/>
+       <entry box="0,3,29,4"/>
       </state_glyph>
      </state>
      <state_glyph node="4,20,80,46">
-      <entry box="1,2,31,2"/>
-      <exit box="1,4,31,2"/>
+      <entry box="0,3,31,2"/>
+      <exit box="0,5,31,2"/>
      </state_glyph>
     </state>
     <state_diagram size="88,74"/>
@@ -212,7 +212,7 @@ return res;</code>
 
 QACTIVE_POST(ao_motor, &amp;motor_e_break_evt, me);</entry>
      <state_glyph node="50,4,26,28">
-      <entry box="1,2,23,2"/>
+      <entry box="0,3,23,2"/>
      </state_glyph>
     </state>
     <state name="operation">
@@ -247,7 +247,7 @@ QACTIVE_POST(ao_controller, &amp;evt, me);</entry>
        </tran_glyph>
       </tran>
       <state_glyph node="8,10,34,14">
-       <entry box="1,2,25,4"/>
+       <entry box="0,3,25,4"/>
       </state_glyph>
      </state>
      <state name="ready">
@@ -262,7 +262,7 @@ QACTIVE_POST(ao_decoder, &amp;evt, me);</entry>
        </tran_glyph>
       </tran>
       <state_glyph node="8,36,34,20">
-       <entry box="1,2,31,4"/>
+       <entry box="0,3,31,4"/>
       </state_glyph>
      </state>
      <state_glyph node="4,4,42,56"/>
@@ -410,13 +410,13 @@ $declare${controller}
    </attribute>
    <statechart properties="0x02">
     <initial target="../1">
-     <initial_glyph conn="5,2,5,0,7,2">
+     <initial_glyph color="3" conn="5,2,5,0,7,2">
       <action box="0,-2,10,2"/>
      </initial_glyph>
     </initial>
     <state name="operation">
      <initial target="../2">
-      <initial_glyph conn="7,13,5,0,5,3">
+      <initial_glyph color="2" conn="7,13,5,0,5,3">
        <action box="0,-2,10,2"/>
       </initial_glyph>
      </initial>
@@ -438,12 +438,12 @@ err = configure_motor(me, e);</action>
         </choice_glyph>
        </choice>
        <choice target="../../../3">
-        <guard brief="else">else</guard>
-        <choice_glyph conn="36,22,5,3,10">
+        <guard brief="noerror">else</guard>
+        <choice_glyph color="2" conn="36,22,5,3,10">
          <action box="2,-2,7,2"/>
         </choice_glyph>
        </choice>
-       <tran_glyph conn="8,22,3,-1,28">
+       <tran_glyph color="2" conn="8,22,3,-1,28">
         <action box="0,-2,22,4"/>
        </tran_glyph>
       </tran>
@@ -451,7 +451,7 @@ err = configure_motor(me, e);</action>
      </state>
      <state name="configured">
       <tran trig="MOTOR_CTRL_START" target="../../4">
-       <tran_glyph conn="46,22,3,0,30,8">
+       <tran_glyph color="3" conn="46,22,3,0,30,8">
         <action box="0,-2,22,2"/>
        </tran_glyph>
       </tran>
@@ -461,12 +461,12 @@ err = configure_motor(me, e);</action>
       <entry brief="enable motor driver"/>
       <exit brief="disable motor driver"/>
       <initial target="../5">
-       <initial_glyph conn="11,51,5,0,7,3">
+       <initial_glyph color="1" conn="11,55,5,0,7,3">
         <action box="0,-2,10,2"/>
        </initial_glyph>
       </initial>
       <tran trig="MOTOR_CTRL_RECONFIGURE" target="../../3">
-       <tran_glyph conn="8,39,3,1,77,-19,-15">
+       <tran_glyph color="2" conn="8,40,3,1,77,-20,-15">
         <action box="0,-2,24,2"/>
        </tran_glyph>
       </tran>
@@ -474,7 +474,7 @@ err = configure_motor(me, e);</action>
        <action>/* Flush the queue since an emergency brake has been requested.
  * This prevents event being posted by entering the super-state &quot;stop&quot; */
 QActive_flushDeferred(ao_motor, &amp;me-&gt;zeroCrossingQueue, Q_DIM(zcQueue));</action>
-       <tran_glyph conn="8,48,3,0,32,12">
+       <tran_glyph conn="8,52,3,0,32,12">
         <action box="0,-2,20,2"/>
        </tran_glyph>
       </tran>
@@ -508,18 +508,18 @@ else {
 }</action>
        <choice target="../../6">
         <guard brief="else">else</guard>
-        <choice_glyph conn="60,42,5,1,18,50,-4">
+        <choice_glyph color="1" conn="60,44,5,1,18,48,-4">
          <action box="1,-2,8,2"/>
         </choice_glyph>
        </choice>
        <choice>
         <guard brief="at_speed">is_at_speed(me)</guard>
         <action brief="ignore"/>
-        <choice_glyph conn="60,42,4,-1,4,15">
+        <choice_glyph color="1" conn="60,44,4,-1,6,15">
          <action box="1,2,14,2"/>
         </choice_glyph>
        </choice>
-       <tran_glyph conn="8,42,3,-1,52">
+       <tran_glyph color="1" conn="8,44,3,-1,52">
         <action box="0,-2,47,2"/>
        </tran_glyph>
       </tran>
@@ -535,7 +535,7 @@ motor_reset_substeps(me);
 
 motor_pwm_set(me-&gt;actual_pwm);
 motor_dir_set(me-&gt;direction);</action>
-       <tran_glyph conn="8,45,3,0,50,9">
+       <tran_glyph color="1" conn="8,48,3,0,50,8">
         <action box="0,-2,34,2"/>
        </tran_glyph>
       </tran>
@@ -548,23 +548,23 @@ QActive_recall(ao_motor, &amp;me-&gt;zeroCrossingQueue);
         <entry brief="Disable motor driver, fast decay">emergency_brake();</entry>
         <exit brief="Enable motor driver"/>
         <tran trig="EMERGENCY_BRAKE_RELEASE" target="../..">
-         <tran_glyph conn="16,70,3,1,32">
+         <tran_glyph color="2" conn="16,74,3,1,32">
           <action box="0,-2,25,2"/>
          </tran_glyph>
         </tran>
         <tran trig="CATCH_ALL">
          <action brief="prevent any actions while in e-stop"/>
-         <tran_glyph conn="16,73,3,-1,23">
+         <tran_glyph conn="16,77,3,-1,23">
           <action box="0,-2,23,4"/>
          </tran_glyph>
         </tran>
-        <state_glyph node="16,60,28,16">
-         <entry box="1,2,27,4"/>
-         <exit box="1,6,27,2"/>
+        <state_glyph color="2" node="16,64,28,16">
+         <entry box="0,3,28,2"/>
+         <exit box="0,5,27,2"/>
         </state_glyph>
        </state>
-       <state_glyph node="12,54,36,26">
-        <entry box="1,2,23,2"/>
+       <state_glyph color="3" node="12,58,36,26">
+        <entry box="0,3,23,2"/>
        </state_glyph>
       </state>
       <state name="change">
@@ -577,13 +577,13 @@ compute_substep_param(me);
 QTimeEvt_armX(&amp;me-&gt;accel_timer, me-&gt;t_substp, me-&gt;t_substp);</entry>
        <exit brief="Disarm speed changing timers">QTimeEvt_disarm(&amp;me-&gt;accel_timer);</exit>
        <tran trig="SPEED_REACHED" target="../../7">
-        <tran_glyph conn="12,102,3,2,58,-22">
+        <tran_glyph color="1" conn="12,102,3,2,58,-20">
          <action box="0,-2,18,2"/>
         </tran_glyph>
        </tran>
        <tran trig="MOTOR_STOPPED" target="../../5">
-        <tran_glyph conn="12,98,3,2,28,-18">
-         <action box="0,-2,14,2"/>
+        <tran_glyph color="2" conn="12,98,3,2,28,-14">
+         <action box="0,-2,18,2"/>
         </tran_glyph>
        </tran>
        <tran trig="SPEED_TIMER">
@@ -633,29 +633,29 @@ if (((me-&gt;substp_cnt == me-&gt;substp_num) &amp;&amp; (SPEED_INCREASE == me-&
         QTimeEvt_rearm(&amp;me-&gt;accel_timer, me-&gt;t_substp);
     }
 }</action>
-        <tran_glyph conn="12,106,3,-1,40">
+        <tran_glyph color="1" conn="12,106,3,-1,40">
          <action box="0,-2,36,2"/>
         </tran_glyph>
        </tran>
-       <state_glyph node="12,88,62,22">
-        <entry box="1,2,43,2"/>
-        <exit box="1,4,43,2"/>
+       <state_glyph color="1" node="12,88,62,22">
+        <entry box="0,3,43,2"/>
+        <exit box="0,5,43,2"/>
        </state_glyph>
       </state>
       <state name="cruise">
-       <state_glyph node="54,54,20,26"/>
+       <state_glyph color="1" node="54,56,20,26"/>
       </state>
-      <state_glyph node="8,30,74,90">
-       <entry box="1,2,29,2"/>
-       <exit box="1,4,29,2"/>
+      <state_glyph color="1" node="8,30,74,90">
+       <entry box="0,3,29,2"/>
+       <exit box="0,5,29,2"/>
       </state_glyph>
      </state>
-     <state_glyph node="4,4,84,120"/>
+     <state_glyph color="3" node="4,4,84,120"/>
     </state>
     <state name="error">
      <entry brief="Disable motor driver"/>
-     <state_glyph node="92,4,20,28">
-      <entry box="1,2,17,2"/>
+     <state_glyph color="2" node="92,4,20,28">
+      <entry box="0,3,17,2"/>
      </state_glyph>
     </state>
     <state_diagram size="116,128"/>
@@ -782,8 +782,8 @@ $declare${motor}
        </tran_glyph>
       </tran>
       <state_glyph node="6,20,20,14">
-       <entry box="1,2,17,2"/>
-       <exit box="1,4,17,2"/>
+       <entry box="0,3,17,2"/>
+       <exit box="0,5,17,2"/>
       </state_glyph>
      </state>
      <state_glyph node="4,6,28,32"/>
@@ -797,8 +797,8 @@ $declare${motor}
       </tran_glyph>
      </tran>
      <state_glyph node="50,6,26,32">
-      <entry box="1,2,23,2"/>
-      <exit box="1,4,24,2"/>
+      <entry box="0,3,23,2"/>
+      <exit box="0,5,24,2"/>
      </state_glyph>
     </state>
     <state_diagram size="80,50"/>

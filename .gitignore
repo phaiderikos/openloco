@@ -1,4 +1,9 @@
-*.kicad_pcb-bak
-*.bak
-*.log
-*.aux
+# KiCAD ignored files
+/hardware/**/*.kicad_pcb-bak
+/hardware/**/*.bak
+/hardware/**/*.log
+/hardware/**/*.aux
+
+/hardware/**/*-rescue.dcm
+/hardware/**/*-rescue.lib
+/hardware/sym-lib-table

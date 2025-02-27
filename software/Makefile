@@ -20,7 +20,7 @@ DEBUG = 1
 # optimization
 OPT = -Og
 # QSpy enabled
-Q_SPY = 1
+Q_SPY = 0
 
 #######################################
 # paths
@@ -30,8 +30,6 @@ BUILD_DIR = build
 # CubeMX Repository path
 REPO_DIR=../../../../STM32Cube/Repository
 #pass as an argument to the make command
-# Quantum Framework source code path
-QPC_DIR=../../qp/qpc
 
 ######################################
 # source
@@ -64,20 +62,20 @@ $(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_h
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_exti.c \
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_uart.c \
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_uart_ex.c \
-${QPC_DIR}/src/qv/qv.c \
-${QPC_DIR}/src/qf/qep_hsm.c \
-${QPC_DIR}/src/qf/qep_msm.c \
-${QPC_DIR}/src/qf/qf_act.c \
-${QPC_DIR}/src/qf/qf_actq.c \
-${QPC_DIR}/src/qf/qf_defer.c \
-${QPC_DIR}/src/qf/qf_dyn.c \
-${QPC_DIR}/src/qf/qf_mem.c \
-${QPC_DIR}/src/qf/qf_ps.c \
-${QPC_DIR}/src/qf/qf_qact.c \
-${QPC_DIR}/src/qf/qf_qeq.c \
-${QPC_DIR}/src/qf/qf_qmact.c \
-${QPC_DIR}/src/qf/qf_time.c \
-${QPC_DIR}/ports/arm-cm/qv/gnu/qv_port.c \
+qpc/src/qv/qv.c \
+qpc/src/qf/qep_hsm.c \
+qpc/src/qf/qep_msm.c \
+qpc/src/qf/qf_act.c \
+qpc/src/qf/qf_actq.c \
+qpc/src/qf/qf_defer.c \
+qpc/src/qf/qf_dyn.c \
+qpc/src/qf/qf_mem.c \
+qpc/src/qf/qf_ps.c \
+qpc/src/qf/qf_qact.c \
+qpc/src/qf/qf_qeq.c \
+qpc/src/qf/qf_qmact.c \
+qpc/src/qf/qf_time.c \
+qpc/ports/arm-cm/qv/gnu/qv_port.c \
 core/src/dcc/qm/qm_controller.c \
 core/src/dcc/qm/qm_motor.c \
 core/src/dcc/qm/qm_decoder.c \
@@ -87,11 +85,11 @@ core/src/dcc/decoder.c \
 core/src/dcc/motor.c
 
 ifeq ($(Q_SPY), 1)
-C_SOURCES += ${QPC_DIR}/src/qs/qs.c \
-${QPC_DIR}/src/qs/qs_64bit.c \
-${QPC_DIR}/src/qs/qs_fp.c \
-${QPC_DIR}/src/qs/qs_rx.c \
-${QPC_DIR}/src/qs/qstamp.c
+C_SOURCES += qpc/src/qs/qs.c \
+qpc/src/qs/qs_64bit.c \
+qpc/src/qs/qs_fp.c \
+qpc/src/qs/qs_rx.c \
+qpc/src/qs/qstamp.c
 endif
 
 # ASM sources
@@ -162,8 +160,9 @@ C_INCLUDES =  \
 -I$(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/Legacy \
 -I$(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Device/ST/STM32L0xx/Include \
 -I$(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Include \
--I${QPC_DIR}/include \
--I${QPC_DIR}/ports/arm-cm/qv/gnu
+-Iqpc/include \
+-Iqpc/ports/arm-cm/qv/gnu \
+-Iqpc/ports/config
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
