@@ -13,11 +13,11 @@
 
 #define DCC_DC_RST      0x0
 #define DCC_DC_FTI      0x2
-#define DCC_DC_RES1      0x4
+#define DCC_DC_RES1     0x4
 #define DCC_DC_SDF      0x6
-#define DCC_DC_RES2      0x8
-#define DCC_DC_SAA       0xa
-#define DCC_DC_RES3       0xc
+#define DCC_DC_RES2     0x8
+#define DCC_DC_SAA      0xa
+#define DCC_DC_RES3     0xc
 #define DCC_DC_DAR      0xe
 
 #define DCC_CC_FWD      0x02
@@ -28,11 +28,11 @@
 #define DCC_FE_F1320    0x1e
 #define DCC_FE_F2128    0x1f
 
-uint8_t decode(const uint8_t *buffer, uint8_t len, uint8_t check);
+extern uint8_t decode(const uint8_t *buffer, uint8_t len, uint8_t check);
 
-uint8_t dcc_dec_ctrl(uint8_t instr, uint8_t data, uint8_t data_c);
+extern uint8_t dcc_dec_ctrl(uint8_t instr, uint8_t data, uint8_t data_c);
 
-uint8_t dcc_cons_ctrl(uint8_t instr, uint8_t data, uint8_t data_c);
+extern uint8_t dcc_cons_ctrl(uint8_t instr, uint8_t data, uint8_t data_c);
 
 /**
  * @brief Speed and Direction Instructions
@@ -54,49 +54,49 @@ uint8_t dcc_cons_ctrl(uint8_t instr, uint8_t data, uint8_t data_c);
  * information transmitted in a broadcast packet for Speed and Direction
  * commands that do not contain stop or emergency stop information.
  */
-void dcc_vel_dir(uint8_t instr);
+extern void dcc_vel_dir(uint8_t instr);
 
 /**
  * @brief Function Group One Instruction (100)
  * Up to 5 auxiliary functions (functions FL and F1-F4) can be controlled by the
  * Function Group One instruction.
  */
-void dcc_fun_g1(uint8_t instr);
+extern void dcc_fun_g1(uint8_t instr);
 
 /**
  * @brief Function Group One Instruction (101)
  * Up to 8 additional auxiliary functions (F5-F12) can be controlled by a
  * Function Group Two instruction. Bit 4 defines the use of Bits 0-3.
  */
-void dcc_fun_g2(uint8_t instr);
+extern void dcc_fun_g2(uint8_t instr);
 
 /**
  * @brief Binary State Control Instruction long form
  * Sub instruction "00000" is a three byte instruction and provides for control
  * of one of 32767 binary states within the decoder.
  */
-uint8_t dcc_bin_state_l(const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_bin_state_l(const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief Binary State Control Instruction short form
  * Sub-instruction “11101” is a two byte instruction and provides for control of
  * one of 127 binary states within the decoder
  */
-uint8_t dcc_bin_state_s(const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_bin_state_s(const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief F13-F20 Function Control
  * Sub-instruction “11110” is a two byte instruction and provides for control of
  * eight (8) additional auxiliary functions F13-F20.
  */
-uint8_t dcc_fun_13_20(const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_fun_13_20(const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief F21-F28 Function Control
  * Sub-instruction “11111” is a two byte instruction and provides for control of
  * eight (8) additional auxiliary functions F21-F28.
  */
-uint8_t dcc_fun_21_28(const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_fun_21_28(const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief 128 Speed Step Control
@@ -109,7 +109,7 @@ uint8_t dcc_fun_21_28(const uint8_t *buffer, uint8_t data_c);
  * operations mode acknowledgment is enabled, receipt of a 128 Speed Step
  * Control packet must be acknowledged with an operations mode acknowledgement.
  */
-uint8_t dcc_128_speed(const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_128_speed(const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief Restricted Speed Step Instruction
@@ -120,22 +120,22 @@ uint8_t dcc_128_speed(const uint8_t *buffer, uint8_t data_c);
  * enabled, receipt of a Restricted Speed Instruction must be acknowledged with 
  * an operations mode acknowledgement.
  */
-uint8_t dcc_clamp_speed(const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_clamp_speed(const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief Analog Function Group
  */
-uint8_t dcc_ana_fun_g(const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_ana_fun_g(const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief Configuration Variable Access Instruction - Short Form
  */
-uint8_t dcc_cv_acc_s(uint8_t instr, const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_cv_acc_s(uint8_t instr, const uint8_t *buffer, uint8_t data_c);
 
 /**
  * @brief Configuration Variable Access Instruction - Long Form
  */
-uint8_t dcc_cv_acc_l(uint8_t instr, const uint8_t *buffer, uint8_t data_c);
+extern uint8_t dcc_cv_acc_l(uint8_t instr, const uint8_t *buffer, uint8_t data_c);
 
 
 enum dec_res {
@@ -143,7 +143,3 @@ enum dec_res {
 };
 
 #endif //DCC_ENCODER_MAIN_H
-
-/**
- * @brief
- */

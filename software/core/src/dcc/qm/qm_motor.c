@@ -40,9 +40,10 @@
 
 Q_DEFINE_THIS_MODULE("QM_Motor")
 
-#define ACCEL_TIMER_PERIOD ((uint32_t) 10u)    /* 10 ms */
-#define ACCEL_TICK_RATE    ((uint8_t) 0u)      /* 1 ms tick rate */
-#define MOTOR_ACCELERATION ((int16_t) 1)       /* To be defined */
+#define ACCEL_TIMER_PERIOD ((uint32_t) 10u)    /**< 10 ms period for the acceleration timer */
+#define TIMER_TICK_RATE    ((uint8_t) 0u)      /**< tick rate used for the timers */
+#define MOTOR_ACCELERATION ((int16_t) 1)       /**< To be defined */
+#define FAULT_TIMEOUT      ((uint16_t)1500u)   /**< Max fault duration: 1.5 s */
 
 /* PRIVATE VARIABLES DEFINITIONS */
 
@@ -120,11 +121,43 @@ QState motor_operation_i(motor * const me) {
 QState motor_operation(motor * const me, QEvt const * const e) {
     QState status_;
     switch (e->sig) {
-        default: {
-            //${motor::motor::SM::operation::CATCH_ALL}
-            static QMTranActTable const tatbl_ = { // tran-action table
+        //${motor::motor::SM::operation::MOTOR_FAULT_ASSERT}
+        case MOTOR_FAULT_ASSERT_SIG: {
+            /* Arm the timer */
+            QTimeEvt_armX(&me->fault_timer, (FAULT_TIMEOUT), 0u);
+            status_ = QM_HANDLED();
+            break;
+        }
+        //${motor::motor::SM::operation::MOTOR_FAULT_CLEAR}
+        case MOTOR_FAULT_CLEAR_SIG: {
+            QTimeEvt_disarm(&me->fault_timer);
+            status_ = QM_HANDLED();
+            break;
+        }
+        //${motor::motor::SM::operation::FAULT_TIMEOUT}
+        case FAULT_TIMEOUT_SIG: {
+            static struct {
+                QMState const *target;
+                QActionHandler act[2];
+            } const tatbl_ = { // tran-action table
                 &motor_error_s, // target state
                 {
+                    Q_ACTION_CAST(&motor_error_e), // entry
+                    Q_ACTION_NULL // zero terminator
+                }
+            };
+            status_ = QM_TRAN(&tatbl_);
+            break;
+        }
+        default: {
+            //${motor::motor::SM::operation::CATCH_ALL}
+            static struct {
+                QMState const *target;
+                QActionHandler act[2];
+            } const tatbl_ = { // tran-action table
+                &motor_error_s, // target state
+                {
+                    Q_ACTION_CAST(&motor_error_e), // entry
                     Q_ACTION_NULL // zero terminator
                 }
             };
@@ -154,9 +187,13 @@ QState motor_init(motor * const me, QEvt const * const e) {
             err = configure_motor(me, e);
             //${motor::motor::SM::operation::init::MOTOR_CONFIG::[error]}
             if (NO_ERROR != err) {
-                static QMTranActTable const tatbl_ = { // tran-action table
+                static struct {
+                    QMState const *target;
+                    QActionHandler act[2];
+                } const tatbl_ = { // tran-action table
                     &motor_error_s, // target state
                     {
+                        Q_ACTION_CAST(&motor_error_e), // entry
                         Q_ACTION_NULL // zero terminator
                     }
                 };
@@ -334,8 +371,7 @@ QState motor_running(motor * const me, QEvt const * const e) {
 
             motor_reset_substeps(me);
 
-            motor_pwm_set(me->actual_pwm);
-            motor_dir_set(me->direction);
+            motor_pwm_set(me->actual_pwm, me->direction);
             static QMTranActTable const tatbl_ = { // tran-action table
                 &motor_cruise_s, // target state
                 {
@@ -499,8 +535,7 @@ QState motor_change(motor * const me, QEvt const * const e) {
             pwm = me->actual_pwm + ((me->substp_cnt * me->delta_pwm) >> me->substp_lsr);
 
             /* 3. And set it in the peripheral */
-            motor_dir_set(me->direction);
-            motor_pwm_set(pwm);
+            motor_pwm_set(pwm, me->direction);
 
             /* 4. Integer speed reached? */
             if (((me->substp_cnt == me->substp_num) && (SPEED_INCREASE == me->accel_dir)) ||
@@ -564,10 +599,18 @@ QState motor_cruise(motor * const me, QEvt const * const e) {
 QMState const motor_error_s = {
     QM_STATE_NULL, // superstate (top)
     Q_STATE_CAST(&motor_error),
-    Q_ACTION_NULL, // no entry action
+    Q_ACTION_CAST(&motor_error_e),
     Q_ACTION_NULL, // no exit action
     Q_ACTION_NULL  // no initial tran.
 };
+//${motor::motor::SM::error}
+QState motor_error_e(motor * const me) {
+    emergency_brake();
+
+    /* TODO: Inform the controller */
+    Q_UNUSED_PAR(me);
+    return QM_ENTRY(&motor_error_s);
+}
 //${motor::motor::SM::error}
 QState motor_error(motor * const me, QEvt const * const e) {
     QState status_;
@@ -595,7 +638,8 @@ uint32_t motor_ctor(void) {
     me->direction = DIRECTION_FORWARD;
     me->accel_dir = MOTOR_ACCELERATION;
 
-    QTimeEvt_ctorX(&me->accel_timer, ao_motor, SPEED_TIMER_SIG, ACCEL_TICK_RATE);
+    QTimeEvt_ctorX(&me->accel_timer, ao_motor, SPEED_TIMER_SIG, TIMER_TICK_RATE);
+    QTimeEvt_ctorX(&me->fault_timer, ao_motor, FAULT_TIMEOUT_SIG, TIMER_TICK_RATE);
 
     QEQueue_init(&me->zeroCrossingQueue, zcQueue, Q_DIM(zcQueue));
 

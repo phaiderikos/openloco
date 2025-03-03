@@ -18,86 +18,111 @@
 
 Q_DEFINE_THIS_MODULE("main")
 
-#define SMALL_POOL_SIZE		(64u)
-#define MEDIUM_POOL_SIZE	(32u)
-#define LARGE_POOL_SIZE		(16u)
+#define SMALL_POOL_SIZE     (64u)
+#define MEDIUM_POOL_SIZE    (32u)
+#define LARGE_POOL_SIZE     (16u)
 
-static QEvt const * motor_queue[32u];
-static QEvt const * controller_queue[32u];
-static QEvt const * decoder_queue[32u];
+#define AO_CONTROLLER_QUEUE_SIZE    (32u)
+#define AO_MOTOR_QUEUE_SIZE         (32u)
+#define AO_DECODER_QUEUE_SIZE       (32u)
+
+static QEvt const * motor_queue[AO_MOTOR_QUEUE_SIZE];
+static QEvt const * controller_queue[AO_CONTROLLER_QUEUE_SIZE];
+static QEvt const * decoder_queue[AO_DECODER_QUEUE_SIZE];
 
 static speed_evt small_pool_sto[SMALL_POOL_SIZE];
 static motor_cfg_evt large_pool_sto[LARGE_POOL_SIZE];
 
 /**
- * @brief  The application entry point.
+ * @brief The application entry point.
  *
  * @retval unused (int):
- * 		main function never returns
+ *          main function never returns
  */
 int main(void)
 {
-	/* Active Objects priorities ---------------------------------------- */
-	enum {
-		/* Lower priority */
-		QF_MOTOR_PRIO = 1u,
-		QF_CONTROLLER_PRIO,
-		QF_DECODER_PRIO
-		/* Higher priority */
-	};
+    /* Active Objects priorities ---------------------------------------- */
+    enum {
+        /* Lower priority */
+        QF_MOTOR_PRIO = 1u,
+        QF_CONTROLLER_PRIO,
+        QF_DECODER_PRIO
+        /* Higher priority */
+    };
 
-	/* MCU Configuration ------------------------------------------------ */
-	BSP_Init();
+    /* MCU Configuration ------------------------------------------------ */
+    BSP_Init();
 
-	/* QF INITIALIZATION */
+    /* QF INITIALIZATION */
+    /* Initialise the framework and the underlying RT kernel */
+    QF_init();
 
-	QF_init();	/* Initialise the framework and the underlying RT kernel */
+    QF_poolInit(small_pool_sto, sizeof(small_pool_sto), sizeof(small_pool_sto[0]));
+    QF_poolInit(large_pool_sto, sizeof(large_pool_sto), sizeof(large_pool_sto[0]));
 
-	QF_poolInit(small_pool_sto, sizeof(small_pool_sto), sizeof(small_pool_sto[0]));
-	QF_poolInit(large_pool_sto, sizeof(large_pool_sto), sizeof(large_pool_sto[0]));
+    /* Call the constructor of the active objects */
+    decoder_ctor();
 
-	/* Call the constructor of the active objects */
-	decoder_ctor();
+    motor_ctor();
 
-	motor_ctor();
+    controller_ctor();
 
-	controller_ctor();
+    /* Start the active objects */
+    QACTIVE_START(
+        /* Pointer to Motor AO to start */
+        ao_motor,
+        /* AO priority */
+        QF_MOTOR_PRIO,
+        /* Storage and size of event queue for Motor AO */
+        motor_queue, Q_DIM(motor_queue),
+        /* No stack space is used in QV */
+        (void *)0u, 0u,
+        /* No initial event */
+        (QEvt *)0u
+    );
 
-	/* Start the active objects */
-	QACTIVE_START(	ao_motor,					/* Pointer to Motor AO to start				*/
-			QF_MOTOR_PRIO,					/* AO priority						*/
-			motor_queue, Q_DIM(motor_queue),		/* Storage and size of event queue for Motor AO		*/
-			(void *)0u, 0u,					/* No stack space is used in QV				*/
-			(QEvt *)0u);					/* No initial event					*/
+    QACTIVE_START(
+        /* Pointer to Decoder AO to start */
+        ao_decoder,
+        /* AO priority */
+        QF_DECODER_PRIO,
+        /* Storage and size of event queue for Controller AO */
+        decoder_queue, Q_DIM(decoder_queue),
+        /* No stack space is used in QV */
+        (void *)0u, 0u,
+        /* No initial event */
+        (QEvt *)0u
+    );
 
-	QACTIVE_START(	ao_decoder,					/* Pointer to Decoder AO to start			*/
-			QF_DECODER_PRIO,				/* AO priority						*/
-			decoder_queue, Q_DIM(decoder_queue),		/* Storage and size of event queue for Controller AO	*/
-			(void *)0u, 0u,					/* No stack space is used in QV				*/
-			(QEvt *)0u);					/* No initial event					*/
+    QACTIVE_START(
+        /* Pointer to Controller AO to start */
+        ao_controller,
+        /* AO priority */
+        QF_CONTROLLER_PRIO,
+        /* Storage and size of event queue for Controller AO */
+        controller_queue, Q_DIM(controller_queue),
+        /* No stack space is used in QV */
+        (void *)0u, 0u,
+        /* No initial event */
+        (QEvt *)0u
+    );
 
-	QACTIVE_START(	ao_controller,					/* Pointer to Controller AO to start 			*/
-			QF_CONTROLLER_PRIO,				/* AO priority 						*/
-			controller_queue, Q_DIM(controller_queue),	/* Storage and size of event queue for Controller AO 	*/
-			(void *)0u, 0u,					/* No stack space is used in QV 			*/
-			(QEvt *)0u);					/* No initial event 					*/
-
-	for (;;) {
-		QF_run();
-	}
+    for (;;) {
+        QF_run();
+    }
 }
 
 #ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file(uint8_t *):
- * 		pointer to the source file name
- * @param  line(uint32_t):
- * 		error line
+ * @brief Reports the name of the source file and the source line number
+ *          where the assert_param error has occurred.
+ * @param file(uint8_t *):
+ *          pointer to the source file name
+ * @param line(uint32_t):
+ *          error line
  */
 void assert_failed(uint8_t * file, uint32_t line)
 {
-	Q_onError((char *)file, line);
+    Q_onError((char *)file, line);
 }
-#endif	/* USE_FULL_ASSERT */
+#endif    /* USE_FULL_ASSERT */

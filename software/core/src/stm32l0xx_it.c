@@ -19,6 +19,7 @@
 #include "stm32l0xx_it.h"
 
 #include "decoder.h"
+#include "motor.h"
 
 extern TIM_HandleTypeDef * const tim_dcc;
 extern TIM_HandleTypeDef * const tim_tick;
@@ -33,6 +34,8 @@ extern TIM_HandleTypeDef * const tim_tick;
 void NMI_Handler(void)
 {
 	while (1) {
+	    /* Disable the motor driver */
+	    emergency_brake();
 	}
 }
 
@@ -42,6 +45,8 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
 	while (1) {
+	    /* Disable the motor driver */
+        emergency_brake();
 	}
 }
 

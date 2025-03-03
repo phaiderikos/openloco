@@ -12,7 +12,6 @@
 /* QEP custom signals */
 
 enum {
-
 	UNUSED_SIG = Q_USER_SIG,
 
 	/* Main controller signals */
@@ -30,6 +29,9 @@ enum {
 	MOTOR_STOPPED_SIG,
 	SET_SPEED_SIG,
 	SPEED_TIMER_SIG,
+	MOTOR_FAULT_ASSERT_SIG,
+	MOTOR_FAULT_CLEAR_SIG,
+	FAULT_TIMEOUT_SIG,
 
 	/* Decoder signals */
 	DECODER_START_SIG = 300u,

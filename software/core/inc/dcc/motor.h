@@ -11,22 +11,20 @@
 
 #include "qm_motor.h"
 
-uint32_t configure_motor(motor * const me, QEvt const * const e);
+extern uint32_t configure_motor(motor * const me, QEvt const * const e);
 
-uint32_t motor_reset_substeps(motor * const me);
+extern uint32_t motor_reset_substeps(motor * const me);
 
-uint32_t compute_substep_param(motor * const me);
+extern uint32_t compute_substep_param(motor * const me);
 
-bool is_stopped(motor const * const me);
+extern bool is_stopped(motor const * const me);
 
-bool is_at_speed(motor const * const me);
+extern bool is_at_speed(motor const * const me);
 
-void brake(bool fast);
+extern void brake(bool const fast);
 
-void motor_pwm_set(int16_t value);
+extern void motor_pwm_set(int16_t const value, enum motor_direction const dir);
 
-void motor_dir_set(enum motor_direction dir);
+extern void emergency_brake(void);
 
-void emergency_brake(void);
-
-#endif		/* __DCC_MOTOR_H */
+#endif  /* __DCC_MOTOR_H */

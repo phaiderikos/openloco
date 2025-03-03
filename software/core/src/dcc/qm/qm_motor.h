@@ -112,6 +112,7 @@ typedef struct {
 
     /* Acceleration/deceleration timer */
     QTimeEvt accel_timer;
+    QTimeEvt fault_timer;
     uint16_t speed_table_len;
     uint8_t const * speed_table;
 
@@ -189,6 +190,7 @@ extern QMState const motor_change_s;
 QState motor_cruise  (motor * const me, QEvt const * const e);
 extern QMState const motor_cruise_s;
 QState motor_error  (motor * const me, QEvt const * const e);
+QState motor_error_e(motor * const me);
 extern QMState const motor_error_s;
 
 //${motor::motor_ctor} .......................................................

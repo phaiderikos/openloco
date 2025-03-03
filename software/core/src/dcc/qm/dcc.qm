@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.0" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.1" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <framework name="qpc"/>
  <package name="decoder" stereotype="0x05">
   <class name="decoder" superclass="qpc::QMActive">
@@ -15,33 +15,33 @@
    <attribute name="rx_buffer" type="uint8_t *" visibility="0x00" properties="0x00"/>
    <statechart properties="0x02">
     <initial target="../1">
-     <initial_glyph conn="2,2,5,0,6,2">
+     <initial_glyph color="3" conn="2,2,5,0,6,2">
       <action box="0,-2,10,2"/>
      </initial_glyph>
     </initial>
     <state name="init">
      <tran trig="DECODER_START" target="../../2">
-      <tran_glyph conn="4,12,3,0,24,8">
+      <tran_glyph color="3" conn="4,12,3,0,24,8">
        <action box="0,-2,15,2"/>
       </tran_glyph>
      </tran>
-     <state_glyph node="4,4,20,12"/>
+     <state_glyph color="3" node="4,4,20,12"/>
     </state>
     <state name="decoding">
      <entry brief="Start timer, enable EXTI">BSP_StartDCCTimer();</entry>
      <exit brief="Disable timer and EXTI">BSP_StopDCCTimer();</exit>
      <initial target="../3">
-      <initial_glyph conn="8,28,4,3,4,4">
+      <initial_glyph color="3" conn="8,28,4,3,4,4">
        <action box="0,-2,10,2"/>
       </initial_glyph>
      </initial>
      <tran trig="DECODER_STOP" target="../../1">
-      <tran_glyph conn="4,62,3,1,76,-54,-56">
+      <tran_glyph color="3" conn="4,62,3,1,76,-54,-56">
        <action box="0,-2,15,2"/>
       </tran_glyph>
      </tran>
      <tran trig="DECODER_RST" target="..">
-      <tran_glyph conn="24,66,2,2,4,22,-4">
+      <tran_glyph color="3" conn="24,66,2,2,4,22,-4">
        <action box="0,2,14,2"/>
       </tran_glyph>
      </tran>
@@ -52,28 +52,28 @@ me-&gt;byte_cnt = 0u;</entry>
       <tran trig="BIT_0">
        <choice target="../../../4">
         <guard brief="len&gt;=11">me-&gt;bit_cnt &gt;= MIN_PREAMBLE_LEN</guard>
-        <choice_glyph conn="26,40,5,3,16">
+        <choice_glyph color="3" conn="26,40,5,3,16">
          <action box="1,-2,10,2"/>
         </choice_glyph>
        </choice>
        <choice target="../..">
         <guard brief="len&lt;11">else</guard>
         <action brief="reset"/>
-        <choice_glyph conn="26,40,4,2,14,4,-2">
+        <choice_glyph color="3" conn="26,40,4,2,14,4,-2">
          <action box="1,2,10,2"/>
         </choice_glyph>
        </choice>
-       <tran_glyph conn="12,40,3,-1,14">
+       <tran_glyph color="3" conn="12,40,3,-1,14">
         <action box="0,-2,8,2"/>
        </tran_glyph>
       </tran>
       <tran trig="BIT_1">
        <action brief="increment counter">me-&gt;bit_cnt++;</action>
-       <tran_glyph conn="12,36,3,-1,20">
+       <tran_glyph color="3" conn="12,36,3,-1,20">
         <action box="0,-2,19,2"/>
        </tran_glyph>
       </tran>
-      <state_glyph node="12,28,26,24">
+      <state_glyph color="3" node="12,28,26,24">
        <entry box="0,3,25,2"/>
       </state_glyph>
      </state>
@@ -85,7 +85,7 @@ me-&gt;rec_byte = 0u;</entry>
        <choice target="../../../3">
         <guard brief="8bits">me-&gt;bit_cnt &gt; 8</guard>
         <action brief="Handle packet">post_dcc_message(me);</action>
-        <choice_glyph conn="54,36,5,3,24,22,-68,-14,2">
+        <choice_glyph color="3" conn="54,36,5,3,24,22,-68,-14,2">
          <action box="1,-2,17,2"/>
         </choice_glyph>
        </choice>
@@ -93,11 +93,11 @@ me-&gt;rec_byte = 0u;</entry>
         <guard brief="else">else</guard>
         <action>me-&gt;rec_byte &lt;&lt;= 1u;
 me-&gt;rec_byte |= 1u;</action>
-        <choice_glyph conn="54,36,4,-1,4,8">
+        <choice_glyph color="3" conn="54,36,4,-1,4,8">
          <action box="1,2,6,2"/>
         </choice_glyph>
        </choice>
-       <tran_glyph conn="42,36,3,-1,12">
+       <tran_glyph color="3" conn="42,36,3,-1,12">
         <action box="0,-2,10,2"/>
        </tran_glyph>
       </tran>
@@ -110,26 +110,26 @@ me-&gt;rec_byte |= 1u;</action>
 me-&gt;byte_cnt++;
 
 Q_ASSERT(me-&gt;byte_cnt &lt;= DCC_MAX_PACKET_LEN);</action>
-        <choice_glyph conn="54,46,5,1,22,4,-2">
+        <choice_glyph color="3" conn="54,46,5,1,22,4,-2">
          <action box="1,-2,19,2"/>
         </choice_glyph>
        </choice>
        <choice>
         <guard brief="else">else</guard>
         <action>me-&gt;rec_byte &lt;&lt;= 1u;</action>
-        <choice_glyph conn="54,46,4,-1,4,8">
+        <choice_glyph color="3" conn="54,46,4,-1,4,8">
          <action box="1,2,7,2"/>
         </choice_glyph>
        </choice>
-       <tran_glyph conn="42,46,3,-1,12">
+       <tran_glyph color="3" conn="42,46,3,-1,12">
         <action box="0,-2,10,2"/>
        </tran_glyph>
       </tran>
-      <state_glyph node="42,28,32,24">
+      <state_glyph color="3" node="42,28,32,24">
        <entry box="0,3,29,4"/>
       </state_glyph>
      </state>
-     <state_glyph node="4,20,80,46">
+     <state_glyph color="3" node="4,20,80,46">
       <entry box="0,3,31,2"/>
       <exit box="0,5,31,2"/>
      </state_glyph>
@@ -203,7 +203,7 @@ return res;</code>
   <class name="controller" superclass="qpc::QMActive">
    <statechart properties="0x02">
     <initial target="../2">
-     <initial_glyph conn="2,2,5,0,10,2">
+     <initial_glyph color="2" conn="2,2,5,0,10,2">
       <action box="0,-2,10,2"/>
      </initial_glyph>
     </initial>
@@ -211,13 +211,13 @@ return res;</code>
      <entry brief="Signal error to other SM">static const QEvt motor_e_break_evt = {EMERGENCY_BRAKE_SIG, 0u, 0u};
 
 QACTIVE_POST(ao_motor, &amp;motor_e_break_evt, me);</entry>
-     <state_glyph node="50,4,26,28">
+     <state_glyph color="2" node="50,4,26,28">
       <entry box="0,3,23,2"/>
      </state_glyph>
     </state>
     <state name="operation">
      <initial target="../1">
-      <initial_glyph conn="6,8,5,0,10,2">
+      <initial_glyph color="2" conn="6,8,5,0,10,2">
        <action box="0,-2,10,2"/>
       </initial_glyph>
      </initial>
@@ -238,11 +238,11 @@ QACTIVE_POST(ao_controller, &amp;evt, me);</entry>
        </choice>
        <choice target="../../../2">
         <guard brief="noerror">else</guard>
-        <choice_glyph conn="34,28,4,0,8">
+        <choice_glyph color="2" conn="34,28,4,0,8">
          <action box="0,2,10,2"/>
         </choice_glyph>
        </choice>
-       <tran_glyph conn="8,20,3,-1,26,8">
+       <tran_glyph color="2" conn="8,20,3,-1,26,8">
         <action box="0,-2,32,2"/>
        </tran_glyph>
       </tran>
@@ -257,12 +257,12 @@ static const QEvt evt = QEVT_INITIALIZER(DECODER_START_SIG);
 QACTIVE_POST(ao_decoder, &amp;evt, me);</entry>
       <tran trig="DCC_MESSAGE">
        <action brief="decode message"/>
-       <tran_glyph conn="8,46,3,-1,30">
+       <tran_glyph color="1" conn="8,46,3,-1,30">
         <action box="0,-2,28,2"/>
        </tran_glyph>
       </tran>
-      <state_glyph node="8,36,34,20">
-       <entry box="0,3,31,4"/>
+      <state_glyph color="1" node="8,36,34,20">
+       <entry box="0,3,33,4"/>
       </state_glyph>
      </state>
      <state_glyph node="4,4,42,56"/>
@@ -362,6 +362,7 @@ $declare${controller}
    <attribute name="accel_timer" type="QTimeEvt" visibility="0x02" properties="0x00">
     <documentation>/* Acceleration/deceleration timer */</documentation>
    </attribute>
+   <attribute name="fault_timer" type="QTimeEvt" visibility="0x02" properties="0x00"/>
    <attribute name="speed_table_len" type="uint16_t" visibility="0x02" properties="0x00"/>
    <attribute name="speed_table" type="uint8_t const *" visibility="0x02" properties="0x00"/>
    <attribute name="configuration" type="motor_config *" visibility="0x02" properties="0x00">
@@ -415,15 +416,33 @@ $declare${controller}
      </initial_glyph>
     </initial>
     <state name="operation">
-     <initial target="../2">
+     <initial target="../5">
       <initial_glyph color="2" conn="7,13,5,0,5,3">
        <action box="0,-2,10,2"/>
       </initial_glyph>
      </initial>
      <tran trig="CATCH_ALL" target="../../2">
       <action brief="Unexpected events are treated as errors"/>
-      <tran_glyph conn="4,10,3,3,88">
+      <tran_glyph conn="4,10,3,3,92">
        <action box="0,-2,47,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="MOTOR_FAULT_ASSERT">
+      <action brief="Arm fault timeout">/* Arm the timer */
+QTimeEvt_armX(&amp;me-&gt;fault_timer, (FAULT_TIMEOUT), 0u);</action>
+      <tran_glyph conn="4,124,3,-1,34">
+       <action box="0,-2,33,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="MOTOR_FAULT_CLEAR">
+      <action brief="Disarm fault timer">QTimeEvt_disarm(&amp;me-&gt;fault_timer);</action>
+      <tran_glyph color="1" conn="4,128,3,-1,34">
+       <action box="0,-2,32,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="FAULT_TIMEOUT" target="../../2">
+      <tran_glyph conn="4,132,3,3,88,-114,4">
+       <action box="0,-2,21,2"/>
       </tran_glyph>
      </tran>
      <state name="init">
@@ -433,11 +452,11 @@ $declare${controller}
 err = configure_motor(me, e);</action>
        <choice target="../../../../2">
         <guard brief="error">NO_ERROR != err</guard>
-        <choice_glyph conn="36,22,4,3,-8,56">
+        <choice_glyph conn="36,22,4,3,-8,60">
          <action box="2,-10,10,2"/>
         </choice_glyph>
        </choice>
-       <choice target="../../../3">
+       <choice target="../../../6">
         <guard brief="noerror">else</guard>
         <choice_glyph color="2" conn="36,22,5,3,10">
          <action box="2,-2,7,2"/>
@@ -450,8 +469,8 @@ err = configure_motor(me, e);</action>
       <state_glyph node="8,16,24,10"/>
      </state>
      <state name="configured">
-      <tran trig="MOTOR_CTRL_START" target="../../4">
-       <tran_glyph color="3" conn="46,22,3,0,30,8">
+      <tran trig="MOTOR_CTRL_START" target="../../7">
+       <tran_glyph color="1" conn="46,22,3,0,30,8">
         <action box="0,-2,22,2"/>
        </tran_glyph>
       </tran>
@@ -465,7 +484,7 @@ err = configure_motor(me, e);</action>
         <action box="0,-2,10,2"/>
        </initial_glyph>
       </initial>
-      <tran trig="MOTOR_CTRL_RECONFIGURE" target="../../3">
+      <tran trig="MOTOR_CTRL_RECONFIGURE" target="../../6">
        <tran_glyph color="2" conn="8,40,3,1,77,-20,-15">
         <action box="0,-2,24,2"/>
        </tran_glyph>
@@ -515,7 +534,7 @@ else {
        <choice>
         <guard brief="at_speed">is_at_speed(me)</guard>
         <action brief="ignore"/>
-        <choice_glyph color="1" conn="60,44,4,-1,6,15">
+        <choice_glyph color="1" conn="60,44,4,-1,4,15">
          <action box="1,2,14,2"/>
         </choice_glyph>
        </choice>
@@ -533,8 +552,7 @@ me-&gt;direction = s_evt-&gt;direction;
 
 motor_reset_substeps(me);
 
-motor_pwm_set(me-&gt;actual_pwm);
-motor_dir_set(me-&gt;direction);</action>
+motor_pwm_set(me-&gt;actual_pwm, me-&gt;direction);</action>
        <tran_glyph color="1" conn="8,48,3,0,50,8">
         <action box="0,-2,34,2"/>
        </tran_glyph>
@@ -545,10 +563,10 @@ QActive_recall(ao_motor, &amp;me-&gt;zeroCrossingQueue);
 
 //motor_speed_set(0);</entry>
        <state name="e_stop">
-        <entry brief="Disable motor driver, fast decay">emergency_brake();</entry>
+        <entry brief="Disable motor driver, slow decay (fast break)">emergency_brake();</entry>
         <exit brief="Enable motor driver"/>
         <tran trig="EMERGENCY_BRAKE_RELEASE" target="../..">
-         <tran_glyph color="2" conn="16,74,3,1,32">
+         <tran_glyph color="3" conn="16,74,3,1,32">
           <action box="0,-2,25,2"/>
          </tran_glyph>
         </tran>
@@ -604,8 +622,7 @@ if (SPEED_INCREASE == me-&gt;accel_dir) {
 pwm = me-&gt;actual_pwm + ((me-&gt;substp_cnt * me-&gt;delta_pwm) &gt;&gt; me-&gt;substp_lsr);
 
 /* 3. And set it in the peripheral */
-motor_dir_set(me-&gt;direction);
-motor_pwm_set(pwm);
+motor_pwm_set(pwm, me-&gt;direction);
 
 /* 4. Integer speed reached? */
 if (((me-&gt;substp_cnt == me-&gt;substp_num) &amp;&amp; (SPEED_INCREASE == me-&gt;accel_dir)) ||
@@ -650,15 +667,17 @@ if (((me-&gt;substp_cnt == me-&gt;substp_num) &amp;&amp; (SPEED_INCREASE == me-&
        <exit box="0,5,29,2"/>
       </state_glyph>
      </state>
-     <state_glyph color="3" node="4,4,84,120"/>
+     <state_glyph color="3" node="4,4,84,132"/>
     </state>
     <state name="error">
-     <entry brief="Disable motor driver"/>
-     <state_glyph color="2" node="92,4,20,28">
-      <entry box="0,3,17,2"/>
+     <entry brief="Disable motor driver">emergency_brake();
+
+/* TODO: Inform the controller */</entry>
+     <state_glyph color="2" node="96,4,20,28">
+      <entry box="0,3,18,2"/>
      </state_glyph>
     </state>
-    <state_diagram size="116,128"/>
+    <state_diagram size="120,140"/>
    </statechart>
   </class>
   <operation name="motor_ctor" type="uint32_t" visibility="0x00" properties="0x00">
@@ -675,7 +694,8 @@ me-&gt;next_step = 0u;
 me-&gt;direction = DIRECTION_FORWARD;
 me-&gt;accel_dir = MOTOR_ACCELERATION;
 
-QTimeEvt_ctorX(&amp;me-&gt;accel_timer, ao_motor, SPEED_TIMER_SIG, ACCEL_TICK_RATE);
+QTimeEvt_ctorX(&amp;me-&gt;accel_timer, ao_motor, SPEED_TIMER_SIG, TIMER_TICK_RATE);
+QTimeEvt_ctorX(&amp;me-&gt;fault_timer, ao_motor, FAULT_TIMEOUT_SIG, TIMER_TICK_RATE);
 
 QEQueue_init(&amp;me-&gt;zeroCrossingQueue, zcQueue, Q_DIM(zcQueue));
 
@@ -700,9 +720,10 @@ return res;</code>
 
 Q_DEFINE_THIS_MODULE(&quot;QM_Motor&quot;)
 
-#define ACCEL_TIMER_PERIOD ((uint32_t) 10u)    /* 10 ms */
-#define ACCEL_TICK_RATE    ((uint8_t) 0u)      /* 1 ms tick rate */
-#define MOTOR_ACCELERATION ((int16_t) 1)       /* To be defined */
+#define ACCEL_TIMER_PERIOD ((uint32_t) 10u)    /**&lt; 10 ms period for the acceleration timer */
+#define TIMER_TICK_RATE    ((uint8_t) 0u)      /**&lt; tick rate used for the timers */
+#define MOTOR_ACCELERATION ((int16_t) 1)       /**&lt; To be defined */
+#define FAULT_TIMEOUT      ((uint16_t)1500u)   /**&lt; Max fault duration: 1.5 s */
 
 /* PRIVATE VARIABLES DEFINITIONS */
 

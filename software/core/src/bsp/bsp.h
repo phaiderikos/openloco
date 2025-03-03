@@ -5,6 +5,7 @@
 
 #include "stm32l0xx_hal.h"
 #include "stdbool.h"
+#include "qp_signals.h"
 
 /* ================ Public pointers to peripheral handles ================ */
 /* Timers structures declarations */
@@ -28,7 +29,9 @@ void BSP_InitUart(void);
 
 /* Common helper functions */
 uint32_t BSP_GetDCCTimer(bool * const ovf);
-void BSP_UsartTx(uint8_t const * const tx_buff, uint32_t const size);
+extern void BSP_UsartTx(uint8_t const * const tx_buff, uint32_t const size);
+
+extern void input_sample(void);
 
 /* Application specific functions */
 extern void BSP_SetCFOF_pin(GPIO_PinState const state);
@@ -44,5 +47,8 @@ extern void BSP_RegisterDCCTimIsr(void (*isr)(void));
 extern void BSP_StartDCCTimer(void);
 
 extern void BSP_StopDCCTimer(void);
+
+extern void BSP_SetMotorPwm1(uint16_t const dc);
+extern void BSP_SetMotorPwm2(uint16_t const dc);
 
 #endif	/* __BPS_H__ */
