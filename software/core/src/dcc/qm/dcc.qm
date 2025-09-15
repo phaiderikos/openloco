@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.1" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.2" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <framework name="qpc"/>
  <package name="decoder" stereotype="0x05">
   <class name="decoder" superclass="qpc::QMActive">
@@ -12,7 +12,8 @@
    <attribute name="byte_cnt" type="uint8_t" visibility="0x00" properties="0x00">
     <documentation>/* Number of bytes received so far */</documentation>
    </attribute>
-   <attribute name="rx_buffer" type="uint8_t *" visibility="0x00" properties="0x00"/>
+   <attribute name="rx_buffer[DCC_MAX_PACKET_LEN]" type="uint8_t" visibility="0x00" properties="0x00"/>
+   <attribute name="log" type="uint32_t" visibility="0x00" properties="0x00"/>
    <statechart properties="0x02">
     <initial target="../1">
      <initial_glyph color="3" conn="2,2,5,0,6,2">
@@ -28,7 +29,8 @@
      <state_glyph color="3" node="4,4,20,12"/>
     </state>
     <state name="decoding">
-     <entry brief="Start timer, enable EXTI">BSP_StartDCCTimer();</entry>
+     <entry brief="Start timer, enable EXTI">BSP_StartDCCTimer();
+BSP_EnableDCCEXTI();</entry>
      <exit brief="Disable timer and EXTI">BSP_StopDCCTimer();</exit>
      <initial target="../3">
       <initial_glyph color="3" conn="8,28,4,3,4,4">
@@ -40,8 +42,12 @@
        <action box="0,-2,15,2"/>
       </tran_glyph>
      </tran>
-     <tran trig="DECODER_RST" target="..">
-      <tran_glyph color="3" conn="24,66,2,2,4,22,-4">
+     <tran trig="DECODER_RST">
+      <action>me-&gt;bit_cnt = 0u;
+me-&gt;rec_byte = 0u;
+me-&gt;byte_cnt = 0u;
+memset(me-&gt;rx_buffer, 0u, DCC_MAX_PACKET_LEN);</action>
+      <tran_glyph color="3" conn="4,64,3,-1,-2,6,44,-6">
        <action box="0,2,14,2"/>
       </tran_glyph>
      </tran>
@@ -52,6 +58,7 @@ me-&gt;byte_cnt = 0u;</entry>
       <tran trig="BIT_0">
        <choice target="../../../4">
         <guard brief="len&gt;=11">me-&gt;bit_cnt &gt;= MIN_PREAMBLE_LEN</guard>
+        <action>me-&gt;log = 0u;</action>
         <choice_glyph color="3" conn="26,40,5,3,16">
          <action box="1,-2,10,2"/>
         </choice_glyph>
@@ -81,10 +88,17 @@ me-&gt;byte_cnt = 0u;</entry>
       <entry brief="Reset bit counter and current byte">me-&gt;bit_cnt = 0u;
 me-&gt;rec_byte = 0u;</entry>
       <tran trig="BIT_1">
-       <action>me-&gt;bit_cnt++;</action>
+       <action>me-&gt;bit_cnt++;
+
+me-&gt;log &lt;&lt;= 1u;
+me-&gt;log |= 1u;</action>
        <choice target="../../../3">
         <guard brief="8bits">me-&gt;bit_cnt &gt; 8</guard>
-        <action brief="Handle packet">post_dcc_message(me);</action>
+        <action brief="Handle packet">me-&gt;rx_buffer[me-&gt;byte_cnt] = me-&gt;rec_byte;
+
+me-&gt;byte_cnt++;
+
+post_dcc_message(me);</action>
         <choice_glyph color="3" conn="54,36,5,3,24,22,-68,-14,2">
          <action box="1,-2,17,2"/>
         </choice_glyph>
@@ -102,7 +116,9 @@ me-&gt;rec_byte |= 1u;</action>
        </tran_glyph>
       </tran>
       <tran trig="BIT_0">
-       <action>me-&gt;bit_cnt++;</action>
+       <action>me-&gt;bit_cnt++;
+
+me-&gt;log &lt;&lt;= 1u;</action>
        <choice target="../..">
         <guard brief="8bits">me-&gt;bit_cnt &gt; 8</guard>
         <action brief="Receive next byte">me-&gt;rx_buffer[me-&gt;byte_cnt] = me-&gt;rec_byte;
@@ -256,7 +272,9 @@ static const QEvt evt = QEVT_INITIALIZER(DECODER_START_SIG);
 
 QACTIVE_POST(ao_decoder, &amp;evt, me);</entry>
       <tran trig="DCC_MESSAGE">
-       <action brief="decode message"/>
+       <action brief="decode message">dcc_message const * const dcc_msg = Q_EVT_CAST(dcc_message);
+
+decode(dcc_msg-&gt;data, dcc_msg-&gt;size, true);</action>
        <tran_glyph color="1" conn="8,46,3,-1,30">
         <action box="0,-2,28,2"/>
        </tran_glyph>

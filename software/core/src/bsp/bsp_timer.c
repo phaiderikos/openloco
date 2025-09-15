@@ -236,7 +236,9 @@ void TIM2_IRQHandler(void)
     __HAL_TIM_CLEAR_FLAG(tim_dcc, TIM_IT_UPDATE);
 
     /* Call the registered ISR */
-    dcc_tim_isr();
+    if (NULL != dcc_tim_isr) {
+        dcc_tim_isr();
+    }
 }
 
 /**

@@ -46,7 +46,6 @@ void BSP_Init(void)
     HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
     HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
 
-    HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
     HAL_NVIC_EnableIRQ(TIM2_IRQn);
 
 #ifdef Q_SPY

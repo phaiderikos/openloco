@@ -23,12 +23,12 @@
 #define DCC_FE          0xC0     // Feature Expansion
 #define DCC_CVAI        0xE0     // Configuration Variable Access Instruction
 
-extern void decoder_aux_dict(void);
+void decoder_aux_dict(void);
 
-extern void decoder_reset(void);
+void decoder_reset(void);
 
-extern uint8_t decode(const uint8_t *buffer, uint8_t len, uint8_t check);
+uint8_t decode(const uint8_t *buffer, uint8_t len, bool check);
 
-extern void post_dcc_message(decoder const * const me);
+void post_dcc_message(decoder const * const me);
 
 #endif //__DCC_DECODER_H

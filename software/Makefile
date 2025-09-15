@@ -28,7 +28,7 @@ Q_SPY = 0
 # Build path
 BUILD_DIR = build
 # CubeMX Repository path
-REPO_DIR=../../../../STM32Cube/Repository
+REPO_DIR ?= ../../../../STM32Cube/Repository
 #pass as an argument to the make command
 
 ######################################
@@ -44,6 +44,7 @@ core/src/bsp/bsp_uart.c \
 core/src/stm32l0xx_it.c \
 core/src/stm32l0xx_hal_msp.c \
 core/src/system_stm32l0xx.c \
+core/src/syscalls.c \
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim.c \
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim_ex.c \
 $(REPO_DIR)/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal.c \
@@ -94,7 +95,7 @@ endif
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32l031xx.s
+startup_stm32l031g6ux.s
 
 
 #######################################
@@ -182,7 +183,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = STM32L031G6Ux_FLASH.ld
+LDSCRIPT = STM32L031G6UX_FLASH.ld
 
 # libraries
 LIBS = -lc -lm -lnosys 

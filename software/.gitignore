@@ -10,8 +10,6 @@ software.kdev4
 
 # STM32CubeIDE files
 /.settings/
-/.project
-/.cproject
 
 /DCC_Decoder_*.cfg
 /DCC_Decoder_*.launch

@@ -26,10 +26,12 @@ Q_DEFINE_THIS_MODULE("main")
 #define AO_MOTOR_QUEUE_SIZE         (32u)
 #define AO_DECODER_QUEUE_SIZE       (32u)
 
+/*----AO event queues allocation----*/
 static QEvt const * motor_queue[AO_MOTOR_QUEUE_SIZE];
 static QEvt const * controller_queue[AO_CONTROLLER_QUEUE_SIZE];
 static QEvt const * decoder_queue[AO_DECODER_QUEUE_SIZE];
 
+/*----Event pools allocation----*/
 static speed_evt small_pool_sto[SMALL_POOL_SIZE];
 static motor_cfg_evt large_pool_sto[LARGE_POOL_SIZE];
 
@@ -76,9 +78,9 @@ int main(void)
         /* Storage and size of event queue for Motor AO */
         motor_queue, Q_DIM(motor_queue),
         /* No stack space is used in QV */
-        (void *)0u, 0u,
+        NULL, 0u,
         /* No initial event */
-        (QEvt *)0u
+        NULL
     );
 
     QACTIVE_START(
@@ -89,9 +91,9 @@ int main(void)
         /* Storage and size of event queue for Controller AO */
         decoder_queue, Q_DIM(decoder_queue),
         /* No stack space is used in QV */
-        (void *)0u, 0u,
+        NULL, 0u,
         /* No initial event */
-        (QEvt *)0u
+        NULL
     );
 
     QACTIVE_START(
@@ -102,9 +104,9 @@ int main(void)
         /* Storage and size of event queue for Controller AO */
         controller_queue, Q_DIM(controller_queue),
         /* No stack space is used in QV */
-        (void *)0u, 0u,
+        NULL, 0u,
         /* No initial event */
-        (QEvt *)0u
+        NULL
     );
 
     for (;;) {

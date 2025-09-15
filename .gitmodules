@@ -1,3 +1,4 @@
 [submodule "software/qpc"]
 	path = software/qpc
 	url = https://github.com/QuantumLeaps/qpc.git
+	branch = v7.3.4

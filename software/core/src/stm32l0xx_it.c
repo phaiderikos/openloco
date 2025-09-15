@@ -76,11 +76,11 @@ void PendSV_Handler(void)
   */
 void EXTI4_15_IRQHandler(void)
 {
-	GPIOA->BRR |= GPIO_PIN_3;
+	//GPIOA->BRR |= GPIO_PIN_3;
 
 	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
 
-	GPIOA->BSRR |= GPIO_PIN_3;
+	//GPIOA->BSRR |= GPIO_PIN_3;
 }
 
 

@@ -29,26 +29,28 @@ void BSP_InitUart(void);
 
 /* Common helper functions */
 uint32_t BSP_GetDCCTimer(bool * const ovf);
-extern void BSP_UsartTx(uint8_t const * const tx_buff, uint32_t const size);
+void BSP_UsartTx(uint8_t const * const tx_buff, uint32_t const size);
 
-extern void input_sample(void);
+void input_sample(void);
 
 /* Application specific functions */
-extern void BSP_SetCFOF_pin(GPIO_PinState const state);
-extern void BSP_SetCFOR_pin(GPIO_PinState const state);
-extern void BSP_SetAUX1_pin(GPIO_PinState const state);
-extern void BSP_SetAUX2_pin(GPIO_PinState const state);
-extern void BSP_SetGPIOA_pin(GPIO_PinState const state);
-extern void BSP_SetGPIOB_pin(GPIO_PinState const state);
+void BSP_SetCFOF_pin(GPIO_PinState const state);
+void BSP_SetCFOR_pin(GPIO_PinState const state);
+void BSP_SetAUX1_pin(GPIO_PinState const state);
+void BSP_SetAUX2_pin(GPIO_PinState const state);
+void BSP_SetGPIOA_pin(GPIO_PinState const state);
+void BSP_SetGPIOB_pin(GPIO_PinState const state);
 
-extern void BSP_RegisterDCCExtIIsr(void (*isr)(void));
-extern void BSP_RegisterDCCTimIsr(void (*isr)(void));
+void BSP_RegisterDCCExtIIsr(void (*isr)(void));
+void BSP_RegisterDCCTimIsr(void (*isr)(void));
 
-extern void BSP_StartDCCTimer(void);
+void BSP_EnableDCCEXTI(void);
 
-extern void BSP_StopDCCTimer(void);
+void BSP_StartDCCTimer(void);
 
-extern void BSP_SetMotorPwm1(uint16_t const dc);
-extern void BSP_SetMotorPwm2(uint16_t const dc);
+void BSP_StopDCCTimer(void);
+
+void BSP_SetMotorPwm1(uint16_t const dc);
+void BSP_SetMotorPwm2(uint16_t const dc);
 
 #endif	/* __BPS_H__ */

@@ -275,6 +275,11 @@ void BSP_RegisterDCCExtIIsr(void (*isr)(void))
     pin_DCC_DATA.isr = isr;
 }
 
+void BSP_EnableDCCEXTI(void)
+{
+    HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+}
+
 void input_sample(void)
 {
     static QEvt flt_asserted = QEVT_INITIALIZER(MOTOR_FAULT_ASSERT_SIG);
